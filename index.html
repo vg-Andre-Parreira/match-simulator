@@ -794,9 +794,8 @@ function generate(){
   const schedA = buildSchedule(teamA, periods, onFieldSize);
   const schedB = buildSchedule(teamB, periods, onFieldSize);
   const scheduleGrid = document.getElementById('scheduleGrid');
-  scheduleGrid.innerHTML =
-    renderScheduleCard('Vermelho', 'vermelho', schedA, duration) +
-    renderScheduleCard('Azul', 'azul', schedB, duration);
+  scheduleGrid.innerHTML = renderScheduleSideBySide(schedA, schedB, duration);
+
   document.getElementById('scheduleOutput').style.display = 'block';
 
   saveGeneratedOutput();
