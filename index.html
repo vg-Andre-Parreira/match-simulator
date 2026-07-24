@@ -514,6 +514,11 @@ function generate(){
   const onFieldSize = 5;
   const periods = Math.max(1, Math.round(duration / 5));
 
+  if(players.length === 11){
+    generateElevenPlayerMode(periods, duration);
+    return;
+  }
+
   const { teamA, teamB, sumA, sumB } = balanceTeams(players);
   const vests = decideVests(teamA, teamB);
 
@@ -534,6 +539,118 @@ function generate(){
     renderScheduleCard('Red', 'red', schedA, duration) +
     renderScheduleCard('Blue', 'blue', schedB, duration);
   document.getElementById('scheduleOutput').style.display = 'block';
+}
+
+// --- Special case: 11 players total -----------------------------------
+// Two 5-a-side teams fill the pitch and exactly one player is left over.
+// That single sub rotates in every 5 minutes, alternating which team
+// receives them (Team1, then Team2, then Team1, ...). Whoever they replace
+// becomes the new sub, ready to feed the OTHER team next time. Within each
+// team, the player who has been on the pitch longest is the one who rests
+// when that team's turn comes up, which keeps things fair over the match.
+function splitElevenBalanced(list){
+  let best = null;
+  for(let i = 0; i < list.length; i++){
+    const subCandidate = list[i];
+    const rest = list.filter((_, idx) => idx !== i);
+    const sorted = [...rest].sort((a,b) => b.rank - a.rank);
+    const teamA = [], teamB = [];
+    let sumA = 0, sumB = 0;
+    sorted.forEach(p => {
+      if(teamA.length < 5 && (sumA <= sumB || teamB.length >= 5)){
+        teamA.push(p); sumA += p.rank;
+      } else {
+        teamB.push(p); sumB += p.rank;
+      }
+    });
+    const diff = Math.abs(sumA - sumB);
+    if(!best || diff < best.diff){
+      best = { sub: subCandidate, teamA, teamB, sumA, sumB, diff };
+    }
+  }
+  return best;
+}
+
+function buildElevenPlayerSchedule(split, periods){
+  let teamA = [...split.teamA]; // queue: front = longest continuously on the pitch
+  let teamB = [...split.teamB];
+  let sub = split.sub;
+  let gkPtrA = 0, gkPtrB = 0;
+  const rows = [];
+
+  for(let t = 0; t < periods; t++){
+    let subbedIn = null, subbedOut = null, fedTeam = null;
+    if(t > 0){
+      const feedsA = (t % 2 === 1);
+      fedTeam = feedsA ? 'Red' : 'Blue';
+      const team = feedsA ? teamA : teamB;
+      const outgoing = team.shift();
+      team.push(sub);
+      subbedIn = sub;
+      subbedOut = outgoing;
+      sub = outgoing;
+    }
+    const gkA = teamA[gkPtrA % teamA.length];
+    const gkB = teamB[gkPtrB % teamB.length];
+    gkPtrA++; gkPtrB++;
+    rows.push({
+      period: t,
+      teamA: [...teamA],
+      teamB: [...teamB],
+      gkA, gkB,
+      sub,
+      subbedIn, subbedOut, fedTeam
+    });
+  }
+  return rows;
+}
+
+function generateElevenPlayerMode(periods, duration){
+  const split = splitElevenBalanced(players);
+  const vests = decideVests(split.teamA, split.teamB);
+
+  metaEl.textContent = `${duration} min match · ${periods} rotation periods of 5 min · 11 players — one rotating sub feeds Team Red and Team Blue alternately · Team Red strength ${split.sumA} vs Team Blue strength ${split.sumB} · Team ${vests.label} wears vests`;
+
+  const teamsGrid = document.getElementById('teamsGrid');
+  teamsGrid.innerHTML =
+    renderTeamCard('Red', 'red', split.teamA, split.sumA, vests.label === 'Red') +
+    renderTeamCard('Blue', 'blue', split.teamB, split.sumB, vests.label === 'Blue');
+  document.getElementById('output').style.display = 'block';
+
+  const rows = buildElevenPlayerSchedule(split, periods);
+  const scheduleGrid = document.getElementById('scheduleGrid');
+  scheduleGrid.innerHTML = `
+    <div class="team-card" style="grid-column:1 / -1;background:rgba(0,0,0,0.22);">
+      <h3>Rotating sub schedule</h3>
+      <div class="team-strength">Starting sub: ${escapeHtml(split.sub.name)} · every 5 min the resting player subs in, alternating between Team Red and Team Blue.</div>
+      <div class="schedule">${renderElevenPeriods(rows, duration)}</div>
+    </div>`;
+  document.getElementById('scheduleOutput').style.display = 'block';
+}
+
+function renderElevenPeriods(rows, duration){
+  return rows.map(r => {
+    const start = r.period * 5;
+    const end = Math.min(duration, start + 5);
+    const teamAHtml = r.teamA.map(p => p === r.gkA
+      ? `<b>${escapeHtml(p.name)} (GK)</b>`
+      : escapeHtml(p.name)).join(', ');
+    const teamBHtml = r.teamB.map(p => p === r.gkB
+      ? `<b>${escapeHtml(p.name)} (GK)</b>`
+      : escapeHtml(p.name)).join(', ');
+    const subLine = r.subbedIn
+      ? `<span class="tag bench">SUB</span>${escapeHtml(r.subbedIn.name)} subs for ${escapeHtml(r.subbedOut.name)} on Team ${r.fedTeam} · resting now: ${escapeHtml(r.sub.name)}`
+      : `<span class="tag bench">SUB</span>Resting: ${escapeHtml(r.sub.name)}`;
+    return `
+      <div class="period">
+        <div class="time">${start}'–${end}'</div>
+        <div class="body">
+          <p><span class="tag gk" style="background:var(--red-team);color:var(--chalk);">T.RED</span>${teamAHtml}</p>
+          <p><span class="tag gk" style="background:var(--blue-team);color:var(--chalk);">T.BLUE</span>${teamBHtml}</p>
+          <p class="onfield">${subLine}</p>
+        </div>
+      </div>`;
+  }).join('');
 }
 
 function renderTeamCard(label, cls, team, sum, wearsVests){
