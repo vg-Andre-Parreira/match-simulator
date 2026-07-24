@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Tundela FC — Teams &amp; Rotation</title>
+<title>Tundela FC — Equipa &amp; Rotação</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
@@ -321,15 +321,15 @@
     </svg>
     <div class="title-block">
       <h1>Tundela FC</h1>
-      <p>Add up to 12 ranked players → get two fair teams, a rotating keeper, and a rotating sub</p>
+      <p>Adiciona até 12 jogadores classificados → obtenha duas equipas justas, um guarda-redes rotativo e um suplente rotativo</p>
     </div>
   </header>
 
   <div class="panel">
-    <h2>01 — Squad</h2>
+    <h2>Equipas</h2>
 
     <div class="preset-block">
-      <span class="rank-label">Quick add from saved list</span>
+      <span class="rank-label">Adiciona usado os do costume</span>
       <div id="presetList" class="preset-list"></div>
     </div>
 
@@ -341,24 +341,24 @@
       <div class="rank-options" id="rankOptions"></div>
     </div>
     <div class="add-row" style="margin-top:12px;">
-      <button class="btn-amber" id="addBtn">Add player</button>
+      <button class="btn-amber" id="addBtn">Adiciona um perna de pau</button>
     </div>
     <div id="playerList"></div>
-    <div id="emptyState">No players yet — add a name and pick a rank (1 = weakest, 10 = strongest) for each of up to 12 players. Match is fixed at 60 min, 5-a-side.</div>
-    <p class="gk-hint">🧤 Tap the glove icon on a player to make them a fixed goalkeeper — up to 2, one per team.</p>
+    <div id="emptyState">Ainda não há jogadores — adiciona um nome e escolhe um rank (1 = mais fraco, 10 = mais forte) para cada um dos até 12 jogadores. O jogo é fixo em 60 min, 5 contra 5.</div>
+    <p class="gk-hint">🧤 Toca no ícone da luva num jogador para o tornares guarda-redes fixo — até 2, um por equipa.</p>
     <div class="cta-row">
-      <button class="btn-amber" id="generateBtn">Generate teams &amp; rotation</button>
+      <button class="btn-amber" id="generateBtn">Gerar equipas &amp; rotação</button>
     </div>
     <div id="meta"></div>
   </div>
 
   <div class="panel" id="output">
-    <h2>03 — Teams</h2>
+    <h2>03 — Equipas</h2>
     <div class="teams-grid" id="teamsGrid"></div>
   </div>
 
   <div class="panel" id="scheduleOutput" style="display:none;">
-    <h2>04 — Rotation plan (every 5 min: keeper changes, sub changes)</h2>
+    <h2>04 — Plano de rotação (a cada 5 min: troca de guarda-redes, troca de suplente)</h2>
     <div class="teams-grid" id="scheduleGrid"></div>
   </div>
 
@@ -366,12 +366,12 @@
     <a href="https://wa.me/351913532698?text=I%20am%20unhappy%20with%20my%20ranking"
        target="_blank" rel="noopener"
        style="text-decoration:none;display:inline-flex;align-items:center;gap:8px;background:#25D366;color:#04170c;font-family:'Inter',sans-serif;font-weight:700;font-size:15px;padding:12px 26px;border-radius:24px;">
-      💬 Complain about my ranking
+      💬 Reclamar do meu ranking
     </a>
     <a href="https://wa.me/351913532698?text=Suggest%20ranking%20for%20me%20or%20my%20teammates"
        target="_blank" rel="noopener"
        style="text-decoration:none;display:inline-flex;align-items:center;gap:8px;background:#25D366;color:#04170c;font-family:'Inter',sans-serif;font-weight:700;font-size:15px;padding:12px 26px;border-radius:24px;">
-      📊 Suggest ranking for me or my teammates
+      📊 Sugerir ranking para mim ou para os meus colegas de equipa
     </a>
   </div>
 
@@ -422,7 +422,7 @@ function renderPresetList(){
 
 function quickAdd(preset){
   metaEl.textContent = '';
-  if(players.length >= 12){ metaEl.textContent = 'Squad is full — 12 players max.'; return; }
+  if(players.length >= 12){ metaEl.textContent = 'Já ta cheio meu puto — 12 pernas de pau max.'; return; }
   if(players.some(p => p.name === preset.name)) return;
   players.push({ name: preset.name, rank: preset.rank });
   renderPlayers();
@@ -458,10 +458,10 @@ function renderPlayers(){
   players.forEach((p, i) => {
     const chip = document.createElement('div');
     chip.className = 'chip' + (p.fixedGK ? ' is-gk' : '');
-    chip.innerHTML = `<span class="rank">${p.rank}</span><span>${escapeHtml(p.name)}</span>${p.fixedGK ? '<span class="gk-badge">GK</span>' : ''}`;
+    chip.innerHTML = `<span class="rank">${p.rank}</span><span>${escapeHtml(p.name)}</span>${p.fixedGK ? '<span class="gk-badge">GR</span>' : ''}`;
     const gkBtn = document.createElement('button');
     gkBtn.className = 'gk-toggle' + (p.fixedGK ? ' active' : '');
-    gkBtn.title = 'Fixed goalkeeper (max 2, one per team)';
+    gkBtn.title = 'Guarda-redes fixo (até 2, um por equipa)';
     gkBtn.textContent = '🧤';
     gkBtn.onclick = () => setFixedGK(i);
     chip.appendChild(gkBtn);
@@ -490,9 +490,9 @@ function addPlayer(){
   const name = nameInput.value.trim();
   const rank = getSelectedRank();
   metaEl.textContent = '';
-  if(!name){ metaEl.textContent = 'Enter a player name.'; return; }
-  if(!rank){ metaEl.textContent = 'Pick a rank from 1 to 10.'; return; }
-  if(players.length >= 12){ metaEl.textContent = 'Squad is full — 12 players max.'; return; }
+  if(!name){ metaEl.textContent = 'Introduz o nome do perna de pau.'; return; }
+  if(!rank){ metaEl.textContent = 'Escolhe um rank de 1 a 10.'; return; }
+  if(players.length >= 12){ metaEl.textContent = 'Já ta cheio meu puto — 12 pernas de pau max.'; return; }
   players.push({ name, rank, fixedGK: false });
   nameInput.value = '';
   clearRankSelection();
@@ -507,7 +507,7 @@ function setFixedGK(index){
   } else {
     const count = players.filter(p => p.fixedGK).length;
     if(count >= 2){
-      metaEl.textContent = 'Only 2 fixed goalkeepers allowed — one per team.';
+      metaEl.textContent = 'Só são permitidos 2 guarda-redes fixos — um por equipa.';
       return;
     }
     players[index].fixedGK = true;
@@ -622,7 +622,7 @@ function buildSchedule(team, periods, onFieldSize){
 
 function generate(){
   metaEl.textContent = '';
-  if(players.length < 2){ metaEl.textContent = 'Add at least 2 players.'; return; }
+  if(players.length < 2){ metaEl.textContent = 'Adiciona pelo menos 2 pernas de pau.'; return; }
 
   const duration = 60;
   const onFieldSize = 5;
@@ -636,7 +636,7 @@ function generate(){
   const { teamA, teamB, sumA, sumB } = balanceTeams(players);
   const vests = decideVests(teamA, teamB);
 
-  metaEl.textContent = `${duration} min match · ${periods} rotation periods of 5 min · Team Red strength ${sumA} vs Team Blue strength ${sumB} · Team ${vests.label} wears vests`;
+  metaEl.textContent = `${duration} min de jogo · ${periods} rotações de 5 min · Força da Equipa Vermelha ${sumA} vs Força da Equipa Azul ${sumB} · A Equipa ${vests.label} usa coletes`;
 
   // Teams panel
   const teamsGrid = document.getElementById('teamsGrid');
@@ -756,7 +756,7 @@ function generateElevenPlayerMode(periods, duration){
   const split = splitElevenBalanced(players);
   const vests = decideVests(split.teamA, split.teamB);
 
-  metaEl.textContent = `${duration} min match · ${periods} rotation periods of 5 min · 11 players — one rotating sub feeds Team Red and Team Blue alternately · Team Red strength ${split.sumA} vs Team Blue strength ${split.sumB} · Team ${vests.label} wears vests`;
+  metaEl.textContent = `${duration} min de jogo · ${periods} rotações de 5 min · 11 jogadores — um suplente rotativo entra alternadamente na Equipa Vermelha e na Equipa Azul · Força da Equipa Vermelha ${split.sumA} vs Força da Equipa Azul ${split.sumB} · A Equipa ${vests.label} usa coletes`;
 
   const teamsGrid = document.getElementById('teamsGrid');
   teamsGrid.innerHTML =
@@ -768,8 +768,8 @@ function generateElevenPlayerMode(periods, duration){
   const scheduleGrid = document.getElementById('scheduleGrid');
   scheduleGrid.innerHTML = `
     <div class="team-card" style="grid-column:1 / -1;background:rgba(0,0,0,0.22);">
-      <h3>Rotating sub schedule</h3>
-      <div class="team-strength">Starting sub: ${escapeHtml(split.sub.name)} · every 5 min the resting player subs in, alternating between Team Red and Team Blue.</div>
+      <h3>Plano de rotação do suplente</h3>
+      <div class="team-strength">Suplente inicial: ${escapeHtml(split.sub.name)} · a cada 5 min o jogador que está a descansar entra, alternando entre a Equipa Vermelha e a Equipa Azul.</div>
       <div class="schedule">${renderElevenPeriods(rows, duration)}</div>
     </div>`;
   document.getElementById('scheduleOutput').style.display = 'block';
@@ -786,8 +786,8 @@ function renderElevenPeriods(rows, duration){
       ? `<b>${escapeHtml(p.name)} (GK)</b>`
       : escapeHtml(p.name)).join(', ');
     const subLine = r.subbedIn
-      ? `<span class="tag bench">SUB</span>${escapeHtml(r.subbedIn.name)} subs for ${escapeHtml(r.subbedOut.name)} on Team ${r.fedTeam} · resting now: ${escapeHtml(r.sub.name)}`
-      : `<span class="tag bench">SUB</span>Resting: ${escapeHtml(r.sub.name)}`;
+      ? `<span class="tag bench">SUB</span>${escapeHtml(r.subbedIn.name)} entra no lugar de ${escapeHtml(r.subbedOut.name)} na Equipa ${r.fedTeam} · a descansar agora: ${escapeHtml(r.sub.name)}`
+      : `<span class="tag bench">SUB</span>A descansar: ${escapeHtml(r.sub.name)}`;
     return `
       <div class="period">
         <div class="time">${start}'–${end}'</div>
@@ -805,21 +805,21 @@ function renderTeamCard(label, cls, team, sum, wearsVests){
     .slice().sort((a,b) => b.rank - a.rank)
     .map(p => `<li><span>${escapeHtml(p.name)}</span><span class="rk">${p.rank}</span></li>`)
     .join('');
-  const vestBadge = wearsVests ? '<span class="vest-badge">Vests</span>' : '';
+  const vestBadge = wearsVests ? '<span class="vest-badge">Coletes</span>' : '';
   return `
     <div class="team-card ${cls}">
-      <h3><span class="dot ${cls}"></span>Team ${label}${vestBadge}</h3>
-      <div class="team-strength">${team.length} players · total rank ${sum} · avg ${(sum/team.length).toFixed(1)}</div>
+      <h3><span class="dot ${cls}"></span>Equipa ${label}${vestBadge}</h3>
+      <div class="team-strength">${team.length} jogadores · total de rank ${sum} · média ${(sum/team.length).toFixed(1)}</div>
       <ul class="roster">${rosterHtml}</ul>
     </div>`;
 }
 
 function renderScheduleCard(label, cls, sched, duration){
   const note = sched.fixedGK
-    ? `<div class="team-strength">${escapeHtml(sched.rows[0].gk.name)} stays in goal all match · the rest rotate Play/Sub.</div>`
+    ? `<div class="team-strength">${escapeHtml(sched.rows[0].gk.name)} fica na baliza durante todo o jogo · o resto alterna entre jogar e estar no banco.</div>`
     : sched.benchSize === 0
-    ? `<div class="team-strength">${sched.field}-a-side, no sub needed — everyone plays every period, only the keeper rotates.</div>`
-    : `<div class="team-strength">${sched.field}-a-side + ${sched.benchSize} sub${sched.benchSize>1?'s':''} rotating on the bench each period.</div>`;
+    ? `<div class="team-strength">${sched.field}-a-side, sem suplentes — todos jogam em todos os períodos, apenas o guarda-redes alterna.</div>`
+    : `<div class="team-strength">${sched.field}-a-side + ${sched.benchSize} suplente${sched.benchSize>1?'s':''} alternando no banco a cada período.</div>`;
 
   const rows = sched.rows.map(r => {
     const start = r.period * 5;
@@ -832,16 +832,16 @@ function renderScheduleCard(label, cls, sched, duration){
       <div class="period">
         <div class="time">${start}'–${end}'</div>
         <div class="body">
-          <p><span class="tag gk">GK</span>${escapeHtml(r.gk.name)}</p>
-          <p><span class="tag bench">SUB</span>${benchTxt}</p>
-          <p class="onfield">On field: ${onFieldTxt}</p>
+          <p><span class="tag gk">GR</span>${escapeHtml(r.gk.name)}</p>
+          <p><span class="tag bench">SUP</span>${benchTxt}</p>
+          <p class="onfield">Em campo: ${onFieldTxt}</p>
         </div>
       </div>`;
   }).join('');
 
   return `
     <div class="team-card ${cls}">
-      <h3><span class="dot ${cls}"></span>Team ${label}</h3>
+      <h3><span class="dot ${cls}"></span>Equipa ${label}</h3>
       ${note}
       <div class="schedule">${rows}</div>
     </div>`;
