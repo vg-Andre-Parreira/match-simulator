@@ -352,6 +352,9 @@
     <div id="playerList"></div>
     <div id="emptyState">Ainda não há jogadores — adiciona um nome e escolhe um nível (INI = mais fraco, MVP = mais forte) para cada um dos até 12 jogadores. O jogo é fixo em 60 min, 5 contra 5.</div>
     <p class="gk-hint">🧤 Toca no ícone da luva num jogador para o tornares guarda-redes fixo — até 2, um por equipa.</p>
+    <div class="add-row" style="margin-top:6px;">
+      <button class="btn-ghost" id="resetBtn">🗑️ Reset total</button>
+    </div>
     <div class="cta-row">
       <button class="btn-amber" id="generateBtn">Gerar equipas &amp; rotação</button>
     </div>
@@ -404,7 +407,29 @@ const PRESET_PLAYERS = [
   { name: 'Renato', rank: 2 }
 ];
 
-let players = [];
+const STORAGE_KEY = 'tundelaFcPlayers_v1';
+
+let players = loadPlayers();
+
+function loadPlayers(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(!raw) return [];
+    const parsed = JSON.parse(raw);
+    if(!Array.isArray(parsed)) return [];
+    return parsed.filter(p => p && typeof p.name === 'string' && typeof p.rank === 'number');
+  } catch(e){
+    return [];
+  }
+}
+
+function savePlayers(){
+  try{
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(players));
+  } catch(e){
+    // storage unavailable (private browsing, quota, etc) — fail silently
+  }
+}
 
 // Categories shown in the UI. Each one maps to a numeric range; the actual
 // rank stored/used for calculations is the median of that range.
@@ -477,6 +502,7 @@ function clearRankSelection(){
 }
 
 function renderPlayers(){
+  savePlayers();
   playerListEl.innerHTML = '';
   emptyStateEl.style.display = players.length ? 'none' : 'block';
   players.forEach((p, i) => {
@@ -540,6 +566,20 @@ function setFixedGK(index){
 }
 
 document.getElementById('generateBtn').onclick = generate;
+
+document.getElementById('resetBtn').onclick = fullReset;
+
+function fullReset(){
+  if(!players.length){ return; }
+  const ok = confirm('Isto apaga todos os jogadores adicionados (e o guardado localmente). Confirmas?');
+  if(!ok) return;
+  players = [];
+  try{ localStorage.removeItem(STORAGE_KEY); } catch(e){}
+  document.getElementById('output').style.display = 'none';
+  document.getElementById('scheduleOutput').style.display = 'none';
+  metaEl.textContent = '';
+  renderPlayers();
+}
 
 function draftInto(pool, capA, capB, teamA, teamB, sumA, sumB){
   const sorted = [...pool].sort((a,b) => b.rank - a.rank);
