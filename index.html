@@ -353,12 +353,12 @@
   </div>
 
   <div class="panel" id="output">
-    <h2>03 — Equipas</h2>
+    <h2>Equipas</h2>
     <div class="teams-grid" id="teamsGrid"></div>
   </div>
 
   <div class="panel" id="scheduleOutput" style="display:none;">
-    <h2>04 — Plano de rotação (a cada 5 min: troca de guarda-redes, troca de suplente)</h2>
+    <h2>Plano de rotação (a cada 5 min: troca de guarda-redes, troca de suplente)</h2>
     <div class="teams-grid" id="scheduleGrid"></div>
   </div>
 
@@ -551,12 +551,12 @@ function decideVests(teamA, teamB){
   const hasParreira = team => team.some(p => p.name.toLowerCase().includes('parreira'));
   const aHas = hasParreira(teamA);
   const bHas = hasParreira(teamB);
-  if(aHas && !bHas) return { label: 'Blue' };
-  if(bHas && !aHas) return { label: 'Red'};
+  if(aHas && !bHas) return { label: 'Azul' };
+  if(bHas && !aHas) return { label: 'Vermelho'};
   // no Parreira on either side (or a Parreira on both) — coin flip
   return Math.random() < 0.5
-    ? { label: 'Red' }
-    : { label: 'Blue' };
+    ? { label: 'Vermelho' }
+    : { label: 'Azul' };
 }
 
 // Builds a fixed per-slot role pattern of length n so that, followed around
@@ -641,8 +641,8 @@ function generate(){
   // Teams panel
   const teamsGrid = document.getElementById('teamsGrid');
   teamsGrid.innerHTML =
-    renderTeamCard('Red', 'red', teamA, sumA, vests.label === 'Red') +
-    renderTeamCard('Blue', 'blue', teamB, sumB, vests.label === 'Blue');
+    renderTeamCard('Vermelho', 'red', teamA, sumA, vests.label === 'Vermelho') +
+    renderTeamCard('Azul', 'blue', teamB, sumB, vests.label === 'Azul');
   document.getElementById('output').style.display = 'block';
 
   // Schedule panel
@@ -650,8 +650,8 @@ function generate(){
   const schedB = buildSchedule(teamB, periods, onFieldSize);
   const scheduleGrid = document.getElementById('scheduleGrid');
   scheduleGrid.innerHTML =
-    renderScheduleCard('Red', 'red', schedA, duration) +
-    renderScheduleCard('Blue', 'blue', schedB, duration);
+    renderScheduleCard('Vermelho', 'red', schedA, duration) +
+    renderScheduleCard('Azul', 'blue', schedB, duration);
   document.getElementById('scheduleOutput').style.display = 'block';
 }
 
@@ -727,7 +727,7 @@ function buildElevenPlayerSchedule(split, periods){
     let subbedIn = null, subbedOut = null, fedTeam = null;
     if(t > 0){
       const feedsA = (t % 2 === 1);
-      fedTeam = feedsA ? 'Red' : 'Blue';
+      fedTeam = feedsA ? 'Vermelho' : 'Azul';
       const rest = feedsA ? restA : restB;
       const outgoing = rest.shift();
       rest.push(sub);
@@ -760,8 +760,8 @@ function generateElevenPlayerMode(periods, duration){
 
   const teamsGrid = document.getElementById('teamsGrid');
   teamsGrid.innerHTML =
-    renderTeamCard('Red', 'red', split.teamA, split.sumA, vests.label === 'Red') +
-    renderTeamCard('Blue', 'blue', split.teamB, split.sumB, vests.label === 'Blue');
+    renderTeamCard('Vermelho', 'red', split.teamA, split.sumA, vests.label === 'Vermelho') +
+    renderTeamCard('Azul', 'blue', split.teamB, split.sumB, vests.label === 'Azul');
   document.getElementById('output').style.display = 'block';
 
   const rows = buildElevenPlayerSchedule(split, periods);
@@ -792,8 +792,8 @@ function renderElevenPeriods(rows, duration){
       <div class="period">
         <div class="time">${start}'–${end}'</div>
         <div class="body">
-          <p><span class="tag gk" style="background:var(--red-team);color:var(--chalk);">T.RED</span>${teamAHtml}</p>
-          <p><span class="tag gk" style="background:var(--blue-team);color:var(--chalk);">T.BLUE</span>${teamBHtml}</p>
+          <p><span class="tag gk" style="background:var(--red-team);color:var(--chalk);">E. Vermelha</span>${teamAHtml}</p>
+          <p><span class="tag gk" style="background:var(--blue-team);color:var(--chalk);">E. Azul</span>${teamBHtml}</p>
           <p class="onfield">${subLine}</p>
         </div>
       </div>`;
