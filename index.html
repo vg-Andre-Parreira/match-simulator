@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Tudela FC Board — Teams & Rotation</title>
+<title>Tundela FC — Teams &amp; Rotation</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
@@ -24,9 +24,7 @@
   *{box-sizing:border-box;}
   body{
     margin:0;
-    background:
-      repeating-linear-gradient(90deg, var(--pitch) 0 60px, var(--pitch-light) 60px 120px);
-    background-color: var(--pitch);
+    background: var(--pitch);
     color:var(--chalk);
     font-family:'Inter',sans-serif;
     min-height:100vh;
@@ -34,18 +32,23 @@
   }
   .wrap{max-width:980px;margin:0 auto;}
   header{
-    text-align:center;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:16px;
+    text-align:left;
     margin-bottom:28px;
-    border-bottom:2px dashed var(--line);
-    padding-bottom:18px;
+    border-bottom:1px solid var(--line);
+    padding-bottom:20px;
   }
+  header .crest{flex:none;width:64px;height:74px;}
+  header .title-block{text-align:left;}
   h1{
     font-family:'Bebas Neue',sans-serif;
-    font-size:clamp(38px,6vw,58px);
+    font-size:clamp(34px,6vw,50px);
     letter-spacing:2px;
-    margin:0 0 4px;
+    margin:0 0 2px;
     color:var(--chalk);
-    text-shadow: 0 2px 0 rgba(0,0,0,0.35);
   }
   header p{
     color:var(--chalk-dim);
@@ -53,8 +56,12 @@
     font-size:14px;
     letter-spacing:0.5px;
   }
+  @media(max-width:520px){
+    header{flex-direction:column;text-align:center;}
+    header .title-block{text-align:center;}
+  }
   .panel{
-    background:rgba(0,0,0,0.22);
+    background:rgba(0,0,0,0.18);
     border:1px solid var(--line);
     border-radius:var(--radius);
     padding:20px;
@@ -152,6 +159,21 @@
   }
   .rank-options label:hover{border-color:var(--chalk-dim);}
 
+  .gk-hint{
+    margin:10px 0 0;font-size:12.5px;color:var(--chalk-dim);
+  }
+  .chip.is-gk{border-color:var(--amber);}
+  .chip .gk-badge{
+    background:var(--amber);color:#2a1c00;font-size:10px;font-weight:700;
+    border-radius:4px;padding:1px 5px;letter-spacing:0.5px;
+  }
+  .gk-toggle{
+    background:transparent;border:1px solid var(--line);color:var(--chalk-dim);
+    border-radius:50%;width:20px;height:20px;font-size:11px;padding:0;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .gk-toggle.active{background:var(--amber);border-color:var(--amber);color:#2a1c00;}
+
   .preset-block{display:flex;flex-direction:column;gap:10px;}
   .preset-list{display:flex;flex-wrap:wrap;gap:8px;}
   .preset-chip{
@@ -192,15 +214,26 @@
   }
 
   .teams-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
-  @media(max-width:700px){.teams-grid{grid-template-columns:1fr;}}
+  @media(max-width:700px){
+    .teams-grid{gap:8px;}
+    .team-card{padding:10px;}
+    .team-card h3{font-size:19px;gap:6px;}
+    .team-strength{font-size:10.5px;margin-bottom:8px;}
+    .roster li{padding:6px 8px;font-size:12.5px;}
+    .period{grid-template-columns:40px 1fr;gap:6px;padding:8px 0;}
+    .period .time{font-size:10.5px;}
+    .period .body p{font-size:11.5px;margin:0 0 3px;}
+    .tag{font-size:9.5px;padding:1px 5px;margin-right:4px;}
+    .vest-badge{font-size:9px;padding:2px 6px;}
+  }
 
   .team-card{
     border-radius:var(--radius);
     padding:18px;
     border:1px solid var(--line);
   }
-  .team-card.red{background:linear-gradient(160deg, var(--red-team-dim), rgba(0,0,0,0.15));}
-  .team-card.blue{background:linear-gradient(160deg, var(--blue-team-dim), rgba(0,0,0,0.15));}
+  .team-card.red{background:rgba(230,57,70,0.14);}
+  .team-card.blue{background:rgba(77,143,172,0.14);}
   .team-card h3{
     font-family:'Bebas Neue',sans-serif;
     font-size:26px;
@@ -232,22 +265,23 @@
   }
   .roster li .rk{font-family:'Space Mono',monospace;color:var(--amber);}
 
-  .schedule{margin-top:14px;}
-  .period{
-    display:grid;
-    grid-template-columns:56px 1fr;
-    gap:10px;
-    padding:10px 0;
-    border-top:1px dashed var(--line);
+  .schedule-head{
+    display:grid;grid-template-columns:52px 1fr 1fr;gap:14px;
+    padding-bottom:8px;margin-bottom:2px;border-bottom:1px solid var(--line);
   }
-  .period:first-child{border-top:none;}
-  .period .time{
-    font-family:'Space Mono',monospace;
-    font-size:12px;
-    color:var(--chalk-dim);
-    padding-top:2px;
+  .schedule-head span{font-size:11px;text-transform:uppercase;letter-spacing:0.5px;color:var(--chalk-dim);}
+  .schedule-row{
+    display:grid;grid-template-columns:52px 1fr 1fr;gap:14px;
+    padding:10px 0;border-top:1px dashed var(--line);
   }
-  .period .body p{margin:0 0 4px;font-size:13.5px;}
+  .schedule-row:first-child{border-top:none;}
+  .schedule-row .time{font-family:'Space Mono',monospace;font-size:12px;color:var(--chalk-dim);padding-top:2px;}
+  .schedule-row .cell p{margin:0 0 4px;font-size:13.5px;}
+  @media(max-width:700px){
+    .schedule-head,.schedule-row{grid-template-columns:38px 1fr 1fr;gap:6px;}
+    .schedule-row .time{font-size:10px;}
+    .schedule-row .cell p{font-size:11px;margin:0 0 3px;}
+  }
   .tag{
     display:inline-block;
     font-size:11px;
@@ -273,8 +307,22 @@
 <div class="wrap">
 
   <header>
-    <h1>Matchday Board</h1>
-    <p>Add up to 12 ranked players → get two fair teams, a rotating keeper, and a rotating sub</p>
+    <svg class="crest" viewBox="0 0 100 116" xmlns="http://www.w3.org/2000/svg">
+      <path d="M50 4 L92 18 V56 C92 84 74 102 50 112 C26 102 8 84 8 56 V18 Z"
+            fill="#14402d" stroke="#ffb703" stroke-width="4"/>
+      <path d="M50 12 L84 24 V56 C84 78 69 93 50 102 C31 93 16 78 16 56 V24 Z"
+            fill="none" stroke="#f4f6f0" stroke-width="1.5" opacity="0.5"/>
+      <circle cx="50" cy="50" r="17" fill="#f4f6f0"/>
+      <path d="M50 36 L60 43 L56 55 L44 55 L40 43 Z" fill="#14402d"/>
+      <path d="M50 36 L50 24" stroke="#14402d" stroke-width="2"/>
+      <path d="M44 55 L38 66 M56 55 L62 66 M40 43 L28 40 M60 43 L72 40" stroke="#14402d" stroke-width="2" fill="none"/>
+      <text x="50" y="88" text-anchor="middle" font-family="'Bebas Neue',sans-serif" font-size="17" fill="#ffb703" letter-spacing="1">TFC</text>
+      <path d="M50 6 L4 20 M50 6 L96 20" stroke="#ffb703" stroke-width="0" fill="none"/>
+    </svg>
+    <div class="title-block">
+      <h1>Tundela FC</h1>
+      <p>Add up to 12 ranked players → get two fair teams, a rotating keeper, and a rotating sub</p>
+    </div>
   </header>
 
   <div class="panel">
@@ -297,6 +345,7 @@
     </div>
     <div id="playerList"></div>
     <div id="emptyState">No players yet — add a name and pick a rank (1 = weakest, 10 = strongest) for each of up to 12 players. Match is fixed at 60 min, 5-a-side.</div>
+    <p class="gk-hint">🧤 Tap the glove icon on a player to make them a fixed goalkeeper — up to 2, one per team.</p>
     <div class="cta-row">
       <button class="btn-amber" id="generateBtn">Generate teams &amp; rotation</button>
     </div>
@@ -314,7 +363,7 @@
   </div>
 
   <div class="cta-row" style="margin-top:8px;gap:12px;flex-wrap:wrap;">
-     <a href="https://wa.me/351913532698?text=My%20ranking%20is%20low%20but%20that%20is%20because%20I%20suck"
+    <a href="https://wa.me/351913532698?text=I%20am%20unhappy%20with%20my%20ranking"
        target="_blank" rel="noopener"
        style="text-decoration:none;display:inline-flex;align-items:center;gap:8px;background:#25D366;color:#04170c;font-family:'Inter',sans-serif;font-weight:700;font-size:15px;padding:12px 26px;border-radius:24px;">
       💬 Complain about my ranking
@@ -325,6 +374,7 @@
       📊 Suggest ranking for me or my teammates
     </a>
   </div>
+
 </div>
 
 <script>
@@ -407,8 +457,14 @@ function renderPlayers(){
   emptyStateEl.style.display = players.length ? 'none' : 'block';
   players.forEach((p, i) => {
     const chip = document.createElement('div');
-    chip.className = 'chip';
-    chip.innerHTML = `<span class="rank">${p.rank}</span><span>${escapeHtml(p.name)}</span>`;
+    chip.className = 'chip' + (p.fixedGK ? ' is-gk' : '');
+    chip.innerHTML = `<span class="rank">${p.rank}</span><span>${escapeHtml(p.name)}</span>${p.fixedGK ? '<span class="gk-badge">GK</span>' : ''}`;
+    const gkBtn = document.createElement('button');
+    gkBtn.className = 'gk-toggle' + (p.fixedGK ? ' active' : '');
+    gkBtn.title = 'Fixed goalkeeper (max 2, one per team)';
+    gkBtn.textContent = '🧤';
+    gkBtn.onclick = () => setFixedGK(i);
+    chip.appendChild(gkBtn);
     const del = document.createElement('button');
     del.className = 'btn-danger';
     del.textContent = '✕';
@@ -437,23 +493,35 @@ function addPlayer(){
   if(!name){ metaEl.textContent = 'Enter a player name.'; return; }
   if(!rank){ metaEl.textContent = 'Pick a rank from 1 to 10.'; return; }
   if(players.length >= 12){ metaEl.textContent = 'Squad is full — 12 players max.'; return; }
-  players.push({ name, rank });
+  players.push({ name, rank, fixedGK: false });
   nameInput.value = '';
   clearRankSelection();
   nameInput.focus();
   renderPlayers();
 }
 
+function setFixedGK(index){
+  metaEl.textContent = '';
+  if(players[index].fixedGK){
+    players[index].fixedGK = false;
+  } else {
+    const count = players.filter(p => p.fixedGK).length;
+    if(count >= 2){
+      metaEl.textContent = 'Only 2 fixed goalkeepers allowed — one per team.';
+      return;
+    }
+    players[index].fixedGK = true;
+  }
+  renderPlayers();
+}
+
 document.getElementById('generateBtn').onclick = generate;
 
-function balanceTeams(list){
-  const sorted = [...list].sort((a,b) => b.rank - a.rank);
-  const cap = Math.ceil(sorted.length / 2);
-  const teamA = [], teamB = [];
-  let sumA = 0, sumB = 0;
+function draftInto(pool, capA, capB, teamA, teamB, sumA, sumB){
+  const sorted = [...pool].sort((a,b) => b.rank - a.rank);
   sorted.forEach(p => {
-    const aOpen = teamA.length < cap;
-    const bOpen = teamB.length < cap;
+    const aOpen = teamA.length < capA;
+    const bOpen = teamB.length < capB;
     if(aOpen && (sumA <= sumB || !bOpen)){
       teamA.push(p); sumA += p.rank;
     } else if(bOpen){
@@ -463,7 +531,21 @@ function balanceTeams(list){
     }
   });
   return { teamA, teamB, sumA, sumB };
-} 
+}
+
+function balanceTeams(list){
+  const fixedGKs = list.filter(p => p.fixedGK);
+  const cap = Math.ceil(list.length / 2);
+
+  if(fixedGKs.length >= 2){
+    // Two fixed goalkeepers: one on each team, teams balanced around them.
+    const teamA = [fixedGKs[0]], teamB = [fixedGKs[1]];
+    const rest = list.filter(p => p !== fixedGKs[0] && p !== fixedGKs[1]);
+    return draftInto(rest, cap, cap, teamA, teamB, fixedGKs[0].rank, fixedGKs[1].rank);
+  }
+
+  return draftInto(list, cap, cap, [], [], 0, 0);
+}
 
 function decideVests(teamA, teamB){
   const hasParreira = team => team.some(p => p.name.toLowerCase().includes('parreira'));
@@ -499,8 +581,28 @@ function buildSchedule(team, periods, onFieldSize){
   const n = team.length;
   const field = Math.min(onFieldSize, n);
   const benchSize = Math.max(0, n - field);
-  const pattern = buildSlotPattern(n, field, benchSize);
 
+  const fixedGK = team.find(p => p.fixedGK);
+  if(fixedGK){
+    // Fixed GK never rotates out. Everyone else just rotates Play/Sub.
+    const outfield = team.filter(p => p !== fixedGK);
+    const n2 = outfield.length;
+    const field2 = Math.max(0, field - 1);
+    const benchSize2 = Math.max(0, n2 - field2);
+    const rows = [];
+    for(let t = 0; t < periods; t++){
+      let bench = [];
+      if(benchSize2 > 0){
+        const start = (t * benchSize2) % n2;
+        for(let b = 0; b < benchSize2; b++) bench.push(outfield[(start + b) % n2]);
+      }
+      const onField = outfield.filter(p => !bench.includes(p));
+      rows.push({ period: t, bench, gk: fixedGK, onField });
+    }
+    return { rows, field, benchSize, fixedGK: true };
+  }
+
+  const pattern = buildSlotPattern(n, field, benchSize);
   const rows = [];
   for(let t = 0; t < periods; t++){
     let gk = null;
@@ -561,9 +663,37 @@ function generate(){
 // team, the player who has been on the pitch longest is the one who rests
 // when that team's turn comes up, which keeps things fair over the match.
 function splitElevenBalanced(list){
+  const fixedGKs = list.filter(p => p.fixedGK);
+
+  if(fixedGKs.length >= 2){
+    const [gkA, gkB] = fixedGKs;
+    const others = list.filter(p => p !== gkA && p !== gkB);
+    let best = null;
+    for(let i = 0; i < others.length; i++){
+      const subCandidate = others[i];
+      const rest = others.filter((_, idx) => idx !== i);
+      const sorted = [...rest].sort((a,b) => b.rank - a.rank);
+      const teamA = [gkA], teamB = [gkB];
+      let sumA = gkA.rank, sumB = gkB.rank;
+      sorted.forEach(p => {
+        if(teamA.length < 5 && (sumA <= sumB || teamB.length >= 5)){
+          teamA.push(p); sumA += p.rank;
+        } else {
+          teamB.push(p); sumB += p.rank;
+        }
+      });
+      const diff = Math.abs(sumA - sumB);
+      if(!best || diff < best.diff){
+        best = { sub: subCandidate, teamA, teamB, sumA, sumB, diff };
+      }
+    }
+    return best;
+  }
+
   let best = null;
   for(let i = 0; i < list.length; i++){
     const subCandidate = list[i];
+    if(subCandidate.fixedGK) continue; // a fixed GK can never be the resting sub
     const rest = list.filter((_, idx) => idx !== i);
     const sorted = [...rest].sort((a,b) => b.rank - a.rank);
     const teamA = [], teamB = [];
@@ -584,8 +714,11 @@ function splitElevenBalanced(list){
 }
 
 function buildElevenPlayerSchedule(split, periods){
-  let teamA = [...split.teamA]; // queue: front = longest continuously on the pitch
-  let teamB = [...split.teamB];
+  const fixedGKA = split.teamA.find(p => p.fixedGK) || null;
+  const fixedGKB = split.teamB.find(p => p.fixedGK) || null;
+  // Rotation queues exclude each team's fixed GK (if any) — front = longest continuously on the pitch.
+  let restA = split.teamA.filter(p => p !== fixedGKA);
+  let restB = split.teamB.filter(p => p !== fixedGKB);
   let sub = split.sub;
   let gkPtrA = 0, gkPtrB = 0;
   const rows = [];
@@ -595,20 +728,22 @@ function buildElevenPlayerSchedule(split, periods){
     if(t > 0){
       const feedsA = (t % 2 === 1);
       fedTeam = feedsA ? 'Red' : 'Blue';
-      const team = feedsA ? teamA : teamB;
-      const outgoing = team.shift();
-      team.push(sub);
+      const rest = feedsA ? restA : restB;
+      const outgoing = rest.shift();
+      rest.push(sub);
       subbedIn = sub;
       subbedOut = outgoing;
       sub = outgoing;
     }
-    const gkA = teamA[gkPtrA % teamA.length];
-    const gkB = teamB[gkPtrB % teamB.length];
-    gkPtrA++; gkPtrB++;
+    const gkA = fixedGKA || restA[gkPtrA % restA.length];
+    const gkB = fixedGKB || restB[gkPtrB % restB.length];
+    if(!fixedGKA) gkPtrA++;
+    if(!fixedGKB) gkPtrB++;
+    const teamA = fixedGKA ? [fixedGKA, ...restA] : [...restA];
+    const teamB = fixedGKB ? [fixedGKB, ...restB] : [...restB];
     rows.push({
       period: t,
-      teamA: [...teamA],
-      teamB: [...teamB],
+      teamA, teamB,
       gkA, gkB,
       sub,
       subbedIn, subbedOut, fedTeam
@@ -680,7 +815,9 @@ function renderTeamCard(label, cls, team, sum, wearsVests){
 }
 
 function renderScheduleCard(label, cls, sched, duration){
-  const note = sched.benchSize === 0
+  const note = sched.fixedGK
+    ? `<div class="team-strength">${escapeHtml(sched.rows[0].gk.name)} stays in goal all match · the rest rotate Play/Sub.</div>`
+    : sched.benchSize === 0
     ? `<div class="team-strength">${sched.field}-a-side, no sub needed — everyone plays every period, only the keeper rotates.</div>`
     : `<div class="team-strength">${sched.field}-a-side + ${sched.benchSize} sub${sched.benchSize>1?'s':''} rotating on the bench each period.</div>`;
 
