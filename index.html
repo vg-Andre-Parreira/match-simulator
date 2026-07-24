@@ -124,9 +124,11 @@
     color:#2a1c00;
     font-family:'Space Mono',monospace;
     font-weight:700;
-    font-size:12px;
-    border-radius:50%;
-    width:22px;height:22px;
+    font-size:11px;
+    letter-spacing:0.3px;
+    border-radius:11px;
+    min-width:22px;height:22px;
+    padding:0 6px;
     display:flex;align-items:center;justify-content:center;
   }
 
@@ -141,13 +143,15 @@
   .rank-options input[type="radio"]{position:absolute;opacity:0;width:0;height:0;}
   .rank-options label{
     display:flex;align-items:center;justify-content:center;
-    width:32px;height:32px;
-    border-radius:50%;
+    min-width:52px;height:32px;
+    padding:0 12px;
+    border-radius:16px;
     border:1px solid var(--line);
     background:var(--pitch-dark);
     color:var(--chalk-dim);
     font-family:'Space Mono',monospace;
     font-size:13px;
+    letter-spacing:0.5px;
     cursor:pointer;
     transition:background .12s ease, color .12s ease, border-color .12s ease;
   }
@@ -193,9 +197,11 @@
     color:var(--chalk-dim);
     font-family:'Space Mono',monospace;
     font-weight:700;
-    font-size:12px;
-    border-radius:50%;
-    width:22px;height:22px;
+    font-size:11px;
+    letter-spacing:0.3px;
+    border-radius:11px;
+    min-width:22px;height:22px;
+    padding:0 6px;
     display:flex;align-items:center;justify-content:center;
   }
   .preset-chip.added{
@@ -344,7 +350,7 @@
       <button class="btn-amber" id="addBtn">Adiciona um perna de pau</button>
     </div>
     <div id="playerList"></div>
-    <div id="emptyState">Ainda não há jogadores — adiciona um nome e escolhe um rank (1 = mais fraco, 10 = mais forte) para cada um dos até 12 jogadores. O jogo é fixo em 60 min, 5 contra 5.</div>
+    <div id="emptyState">Ainda não há jogadores — adiciona um nome e escolhe um nível (INI = mais fraco, MVP = mais forte) para cada um dos até 12 jogadores. O jogo é fixo em 60 min, 5 contra 5.</div>
     <p class="gk-hint">🧤 Toca no ícone da luva num jogador para o tornares guarda-redes fixo — até 2, um por equipa.</p>
     <div class="cta-row">
       <button class="btn-amber" id="generateBtn">Gerar equipas &amp; rotação</button>
@@ -400,6 +406,23 @@ const PRESET_PLAYERS = [
 
 let players = [];
 
+// Categories shown in the UI. Each one maps to a numeric range; the actual
+// rank stored/used for calculations is the median of that range.
+const CATEGORIES = [
+  { key: 'INI', label: 'INI', min: 1, max: 4, value: 2.5 },
+  { key: 'MED', label: 'MED', min: 5, max: 6, value: 5.5 },
+  { key: 'BOM', label: 'BOM', min: 7, max: 8, value: 7.5 },
+  { key: 'MVP', label: 'MVP', min: 9, max: 10, value: 9.5 }
+];
+
+function getCategoryForRank(rank){
+  return CATEGORIES.find(c => rank >= c.min && rank <= c.max) || CATEGORIES[CATEGORIES.length - 1];
+}
+
+function categoryLabel(rank){
+  return getCategoryForRank(rank).label;
+}
+
 const presetListEl = document.getElementById('presetList');
 
 function renderPresetList(){
@@ -408,11 +431,12 @@ function renderPresetList(){
     return;
   }
   presetListEl.innerHTML = '';
-  PRESET_PLAYERS.forEach(preset => {
+  const sortedPresets = [...PRESET_PLAYERS].sort((a, b) => b.rank - a.rank);
+  sortedPresets.forEach(preset => {
     const already = players.some(p => p.name === preset.name);
     const chip = document.createElement('div');
     chip.className = 'preset-chip' + (already ? ' added' : '');
-    chip.innerHTML = `<span class="rank">${preset.rank}</span><span>${escapeHtml(preset.name)}</span>`;
+    chip.innerHTML = `<span class="rank">${categoryLabel(preset.rank)}</span><span>${escapeHtml(preset.name)}</span>`;
     if(!already){
       chip.onclick = () => quickAdd(preset);
     }
@@ -436,15 +460,15 @@ const rankOptionsEl = document.getElementById('rankOptions');
 
 function buildRankOptions(){
   let html = '';
-  for(let i = 1; i <= 10; i++){
-    html += `<input type="radio" name="rank" id="rank${i}" value="${i}"><label for="rank${i}">${i}</label>`;
-  }
+  CATEGORIES.forEach(c => {
+    html += `<input type="radio" name="rank" id="rank${c.key}" value="${c.value}"><label for="rank${c.key}">${c.label}</label>`;
+  });
   rankOptionsEl.innerHTML = html;
 }
 
 function getSelectedRank(){
   const checked = rankOptionsEl.querySelector('input[name="rank"]:checked');
-  return checked ? parseInt(checked.value, 10) : null;
+  return checked ? parseFloat(checked.value) : null;
 }
 
 function clearRankSelection(){
@@ -458,7 +482,7 @@ function renderPlayers(){
   players.forEach((p, i) => {
     const chip = document.createElement('div');
     chip.className = 'chip' + (p.fixedGK ? ' is-gk' : '');
-    chip.innerHTML = `<span class="rank">${p.rank}</span><span>${escapeHtml(p.name)}</span>${p.fixedGK ? '<span class="gk-badge">GR</span>' : ''}`;
+    chip.innerHTML = `<span class="rank">${categoryLabel(p.rank)}</span><span>${escapeHtml(p.name)}</span>${p.fixedGK ? '<span class="gk-badge">GR</span>' : ''}`;
     const gkBtn = document.createElement('button');
     gkBtn.className = 'gk-toggle' + (p.fixedGK ? ' active' : '');
     gkBtn.title = 'Guarda-redes fixo (até 2, um por equipa)';
@@ -491,7 +515,7 @@ function addPlayer(){
   const rank = getSelectedRank();
   metaEl.textContent = '';
   if(!name){ metaEl.textContent = 'Introduz o nome do perna de pau.'; return; }
-  if(!rank){ metaEl.textContent = 'Escolhe um rank de 1 a 10.'; return; }
+  if(!rank){ metaEl.textContent = 'Escolhe um nível: INI, MED, BOM ou MVP.'; return; }
   if(players.length >= 12){ metaEl.textContent = 'Já ta cheio meu puto — 12 pernas de pau max.'; return; }
   players.push({ name, rank, fixedGK: false });
   nameInput.value = '';
@@ -803,7 +827,7 @@ function renderElevenPeriods(rows, duration){
 function renderTeamCard(label, cls, team, sum, wearsVests){
   const rosterHtml = team
     .slice().sort((a,b) => b.rank - a.rank)
-    .map(p => `<li><span>${escapeHtml(p.name)}</span><span class="rk">${p.rank}</span></li>`)
+    .map(p => `<li><span>${escapeHtml(p.name)}</span><span class="rk">${categoryLabel(p.rank)}</span></li>`)
     .join('');
   const vestBadge = wearsVests ? '<span class="vest-badge">Coletes</span>' : '';
   return `
