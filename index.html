@@ -963,36 +963,53 @@ function renderTeamCard(label, cls, team, sum, wearsVests){
     </div>`;
 }
 
-function renderScheduleCard(label, cls, sched, duration){
-  const note = sched.fixedGK
-    ? `<div class="team-strength">${escapeHtml(sched.rows[0].gk.name)} fica na baliza durante todo o jogo · o resto alterna entre jogar e estar no banco.</div>`
+function scheduleNote(sched){
+  return sched.fixedGK
+    ? `${escapeHtml(sched.rows[0].gk.name)} fica na baliza durante todo o jogo · o resto alterna entre jogar e estar no banco.`
     : sched.benchSize === 0
-    ? `<div class="team-strength">${sched.field}-a-side, sem suplentes — todos jogam em todos os períodos, apenas o guarda-redes alterna.</div>`
-    : `<div class="team-strength">${sched.field}-a-side + ${sched.benchSize} suplente${sched.benchSize>1?'s':''} alternando no banco a cada período.</div>`;
+    ? `${sched.field}-a-side, sem suplentes — todos jogam em todos os períodos, apenas o guarda-redes alterna.`
+    : `${sched.field}-a-side + ${sched.benchSize} suplente${sched.benchSize>1?'s':''} alternando no banco a cada período.`;
+}
 
-  const rows = sched.rows.map(r => {
-    const start = r.period * 5;
+function scheduleCellHtml(r){
+  const benchTxt = r.bench.length
+    ? r.bench.map(p => escapeHtml(p.name)).join(', ')
+    : '—';
+  const onFieldTxt = r.onField.map(p => escapeHtml(p.name)).join(', ');
+  return `
+    <div class="sched-cell">
+      <p><span class="tag gk">GR</span>${escapeHtml(r.gk.name)}</p>
+      <p><span class="tag bench">SUP</span>${benchTxt}</p>
+      <p class="onfield">Em campo: ${onFieldTxt}</p>
+    </div>`;
+}
+
+function renderScheduleSideBySide(schedA, schedB, duration){
+  const rows = schedA.rows.map((rA, i) => {
+    const rB = schedB.rows[i];
+    const start = rA.period * 5;
     const end = Math.min(duration, start + 5);
-    const benchTxt = r.bench.length
-      ? r.bench.map(p => escapeHtml(p.name)).join(', ')
-      : '—';
-    const onFieldTxt = r.onField.map(p => escapeHtml(p.name)).join(', ');
     return `
-      <div class="period">
-        <div class="time">${start}'–${end}'</div>
-        <div class="body">
-          <p><span class="tag gk">GR</span>${escapeHtml(r.gk.name)}</p>
-          <p><span class="tag bench">SUP</span>${benchTxt}</p>
-          <p class="onfield">Em campo: ${onFieldTxt}</p>
-        </div>
+      <div class="sched-row">
+        <div class="sched-time">${start}'–${end}'</div>
+        ${scheduleCellHtml(rA)}
+        ${scheduleCellHtml(rB)}
       </div>`;
   }).join('');
 
   return `
-    <div class="team-card ${cls}">
-      <h3><span class="dot ${cls}"></span>Equipa ${label}</h3>
-      ${note}
-      <div class="schedule">${rows}</div>
+    <div class="team-card" style="grid-column:1 / -1;background:rgba(0,0,0,0.22);">
+      <div class="sched-legend">
+        <div></div>
+        <div class="side-label"><span class="dot red"></span>Vermelho</div>
+        <div class="side-label"><span class="dot blue"></span>Azul</div>
+      </div>
+      <div class="sched-notes">
+        <div></div>
+        <div class="team-strength">${scheduleNote(schedA)}</div>
+        <div class="team-strength">${scheduleNote(schedB)}</div>
+      </div>
+      ${rows}
     </div>`;
 }
 
