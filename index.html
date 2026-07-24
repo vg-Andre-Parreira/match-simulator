@@ -641,8 +641,8 @@ function generate(){
   // Teams panel
   const teamsGrid = document.getElementById('teamsGrid');
   teamsGrid.innerHTML =
-    renderTeamCard('Vermelho', 'red', teamA, sumA, vests.label === 'Vermelho') +
-    renderTeamCard('Azul', 'blue', teamB, sumB, vests.label === 'Azul');
+    renderTeamCard('Vermelho', 'vermelho', teamA, sumA, vests.label === 'Vermelho') +
+    renderTeamCard('Azul', 'azul', teamB, sumB, vests.label === 'Azul');
   document.getElementById('output').style.display = 'block';
 
   // Schedule panel
@@ -650,8 +650,8 @@ function generate(){
   const schedB = buildSchedule(teamB, periods, onFieldSize);
   const scheduleGrid = document.getElementById('scheduleGrid');
   scheduleGrid.innerHTML =
-    renderScheduleCard('Vermelho', 'red', schedA, duration) +
-    renderScheduleCard('Azul', 'blue', schedB, duration);
+    renderScheduleCard('Vermelho', 'vermelho', schedA, duration) +
+    renderScheduleCard('Azul', 'azul', schedB, duration);
   document.getElementById('scheduleOutput').style.display = 'block';
 }
 
@@ -760,8 +760,8 @@ function generateElevenPlayerMode(periods, duration){
 
   const teamsGrid = document.getElementById('teamsGrid');
   teamsGrid.innerHTML =
-    renderTeamCard('Vermelho', 'red', split.teamA, split.sumA, vests.label === 'Vermelho') +
-    renderTeamCard('Azul', 'blue', split.teamB, split.sumB, vests.label === 'Azul');
+    renderTeamCard('Vermelho', 'vermelho', split.teamA, split.sumA, vests.label === 'Vermelho') +
+    renderTeamCard('Azul', 'azul', split.teamB, split.sumB, vests.label === 'Azul');
   document.getElementById('output').style.display = 'block';
 
   const rows = buildElevenPlayerSchedule(split, periods);
