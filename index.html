@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tudela FC Board — Teams & Rotation</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --pitch-dark: #0d2b1f;
+    --pitch: #14402d;
+    --pitch-light: #1c5238;
+    --chalk: #f4f6f0;
+    --chalk-dim: #b9c4bb;
+    --line: rgba(244,246,240,0.18);
+    --amber: #ffb703;
+    --red-team: #e63946;
+    --red-team-dim: #4a1e22;
+    --blue-team: #4d8fac;
+    --blue-team-dim: #1c333c;
+    --radius: 10px;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:
+      repeating-linear-gradient(90deg, var(--pitch) 0 60px, var(--pitch-light) 60px 120px);
+    background-color: var(--pitch);
+    color:var(--chalk);
+    font-family:'Inter',sans-serif;
+    min-height:100vh;
+    padding:28px 16px 60px;
+  }
+  .wrap{max-width:980px;margin:0 auto;}
+  header{
+    text-align:center;
+    margin-bottom:28px;
+    border-bottom:2px dashed var(--line);
+    padding-bottom:18px;
+  }
+  h1{
+    font-family:'Bebas Neue',sans-serif;
+    font-size:clamp(38px,6vw,58px);
+    letter-spacing:2px;
+    margin:0 0 4px;
+    color:var(--chalk);
+    text-shadow: 0 2px 0 rgba(0,0,0,0.35);
+  }
+  header p{
+    color:var(--chalk-dim);
+    margin:0;
+    font-size:14px;
+    letter-spacing:0.5px;
+  }
+  .panel{
+    background:rgba(0,0,0,0.22);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:20px;
+    margin-bottom:22px;
+  }
+  .panel h2{
+    font-family:'Bebas Neue',sans-serif;
+    font-size:22px;
+    letter-spacing:1.5px;
+    margin:0 0 14px;
+    color:var(--amber);
+  }
+  .add-row{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+    margin-bottom:16px;
+  }
+  .add-row input{
+    background:var(--pitch-dark);
+    border:1px solid var(--line);
+    color:var(--chalk);
+    border-radius:6px;
+    padding:10px 12px;
+    font-family:'Inter',sans-serif;
+    font-size:14px;
+  }
+  .add-row input[type="text"]{flex:1;min-width:140px;}
+  .add-row input[type="number"]{width:110px;}
+  button{
+    cursor:pointer;
+    border:none;
+    border-radius:6px;
+    font-family:'Inter',sans-serif;
+    font-weight:600;
+    font-size:14px;
+    padding:10px 16px;
+    transition:transform .08s ease, filter .15s ease;
+  }
+  button:active{transform:scale(0.97);}
+  .btn-amber{background:var(--amber);color:#2a1c00;}
+  .btn-amber:hover{filter:brightness(1.08);}
+  .btn-ghost{background:transparent;color:var(--chalk-dim);border:1px solid var(--line);}
+  .btn-ghost:hover{color:var(--chalk);border-color:var(--chalk-dim);}
+  .btn-danger{background:transparent;color:var(--red-team);border:1px solid var(--red-team);padding:4px 9px;font-size:12px;}
+
+  #playerList{
+    display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;min-height:20px;
+  }
+  .chip{
+    display:flex;align-items:center;gap:8px;
+    background:var(--pitch-dark);
+    border:1px solid var(--line);
+    border-radius:20px;
+    padding:6px 8px 6px 14px;
+    font-size:13.5px;
+  }
+  .chip .rank{
+    background:var(--amber);
+    color:#2a1c00;
+    font-family:'Space Mono',monospace;
+    font-weight:700;
+    font-size:12px;
+    border-radius:50%;
+    width:22px;height:22px;
+    display:flex;align-items:center;justify-content:center;
+  }
+
+  .config-row{display:flex;gap:22px;flex-wrap:wrap;margin-bottom:16px;}
+  .config-item{display:flex;flex-direction:column;gap:6px;}
+  .config-item label{font-size:12px;color:var(--chalk-dim);letter-spacing:0.5px;text-transform:uppercase;}
+  .config-item input{width:150px;}
+
+  .rank-row{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:2px;}
+  .rank-label{font-size:12px;color:var(--chalk-dim);letter-spacing:0.5px;text-transform:uppercase;}
+  .rank-options{display:flex;gap:6px;flex-wrap:wrap;}
+  .rank-options input[type="radio"]{position:absolute;opacity:0;width:0;height:0;}
+  .rank-options label{
+    display:flex;align-items:center;justify-content:center;
+    width:32px;height:32px;
+    border-radius:50%;
+    border:1px solid var(--line);
+    background:var(--pitch-dark);
+    color:var(--chalk-dim);
+    font-family:'Space Mono',monospace;
+    font-size:13px;
+    cursor:pointer;
+    transition:background .12s ease, color .12s ease, border-color .12s ease;
+  }
+  .rank-options input[type="radio"]:checked + label{
+    background:var(--amber);
+    border-color:var(--amber);
+    color:#2a1c00;
+    font-weight:700;
+  }
+  .rank-options label:hover{border-color:var(--chalk-dim);}
+
+  .preset-block{display:flex;flex-direction:column;gap:10px;}
+  .preset-list{display:flex;flex-wrap:wrap;gap:8px;}
+  .preset-chip{
+    display:flex;align-items:center;gap:8px;
+    background:var(--pitch-dark);
+    border:1px solid var(--line);
+    border-radius:20px;
+    padding:6px 14px 6px 6px;
+    font-size:13.5px;
+    cursor:pointer;
+    color:var(--chalk);
+    transition:border-color .12s ease, opacity .12s ease;
+  }
+  .preset-chip:hover{border-color:var(--amber);}
+  .preset-chip .rank{
+    background:var(--pitch-light);
+    color:var(--chalk-dim);
+    font-family:'Space Mono',monospace;
+    font-weight:700;
+    font-size:12px;
+    border-radius:50%;
+    width:22px;height:22px;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .preset-chip.added{
+    opacity:0.4;
+    cursor:default;
+    border-color:var(--line);
+  }
+  .preset-chip.added:hover{border-color:var(--line);}
+  .preset-empty{color:var(--chalk-dim);font-size:13px;}
+
+  .cta-row{display:flex;justify-content:center;margin-top:6px;}
+  .cta-row button{font-size:16px;padding:13px 34px;letter-spacing:0.5px;}
+
+  #meta{
+    text-align:center;color:var(--chalk-dim);font-size:13px;min-height:18px;margin-top:8px;
+  }
+
+  .teams-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
+  @media(max-width:700px){.teams-grid{grid-template-columns:1fr;}}
+
+  .team-card{
+    border-radius:var(--radius);
+    padding:18px;
+    border:1px solid var(--line);
+  }
+  .team-card.red{background:linear-gradient(160deg, var(--red-team-dim), rgba(0,0,0,0.15));}
+  .team-card.blue{background:linear-gradient(160deg, var(--blue-team-dim), rgba(0,0,0,0.15));}
+  .team-card h3{
+    font-family:'Bebas Neue',sans-serif;
+    font-size:26px;
+    letter-spacing:1.5px;
+    margin:0 0 2px;
+    display:flex;align-items:center;gap:10px;
+  }
+  .dot{width:12px;height:12px;border-radius:50%;display:inline-block;}
+  .dot.red{background:var(--red-team);}
+  .dot.blue{background:var(--blue-team);}
+  .team-strength{font-size:12.5px;color:var(--chalk-dim);margin-bottom:12px;font-family:'Space Mono',monospace;}
+  .roster{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px;}
+  .roster li{
+    display:flex;justify-content:space-between;
+    background:rgba(0,0,0,0.25);
+    padding:8px 12px;border-radius:6px;font-size:14px;
+  }
+  .roster li .rk{font-family:'Space Mono',monospace;color:var(--amber);}
+
+  .schedule{margin-top:14px;}
+  .period{
+    display:grid;
+    grid-template-columns:56px 1fr;
+    gap:10px;
+    padding:10px 0;
+    border-top:1px dashed var(--line);
+  }
+  .period:first-child{border-top:none;}
+  .period .time{
+    font-family:'Space Mono',monospace;
+    font-size:12px;
+    color:var(--chalk-dim);
+    padding-top:2px;
+  }
+  .period .body p{margin:0 0 4px;font-size:13.5px;}
+  .tag{
+    display:inline-block;
+    font-size:11px;
+    font-weight:700;
+    letter-spacing:0.5px;
+    text-transform:uppercase;
+    padding:2px 7px;
+    border-radius:4px;
+    margin-right:6px;
+  }
+  .tag.gk{background:var(--amber);color:#2a1c00;}
+  .tag.bench{background:transparent;border:1px solid var(--chalk-dim);color:var(--chalk-dim);}
+  .onfield{color:var(--chalk-dim);font-size:12.5px;}
+
+  #output{display:none;}
+  #emptyState{
+    text-align:center;color:var(--chalk-dim);font-size:13.5px;padding:14px 0 2px;
+  }
+  ::placeholder{color:#5f7568;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <h1>Matchday Board</h1>
+    <p>Add up to 12 ranked players → get two fair teams, a rotating keeper, and a rotating sub</p>
+  </header>
+
+  <div class="panel">
+    <h2>01 — Squad</h2>
+
+    <div class="preset-block">
+      <span class="rank-label">Quick add from saved list</span>
+      <div id="presetList" class="preset-list"></div>
+    </div>
+
+    <div class="add-row" style="margin-top:18px;">
+      <input type="text" id="nameInput" placeholder="Player name" maxlength="20">
+    </div>
+    <div class="rank-row">
+      <span class="rank-label">Rank</span>
+      <div class="rank-options" id="rankOptions"></div>
+    </div>
+    <div class="add-row" style="margin-top:12px;">
+      <button class="btn-amber" id="addBtn">Add player</button>
+    </div>
+    <div id="playerList"></div>
+    <div id="emptyState">No players yet — add a name and pick a rank (1 = weakest, 10 = strongest) for each of up to 12 players. Match is fixed at 60 min, 5-a-side.</div>
+    <div class="cta-row">
+      <button class="btn-amber" id="generateBtn">Generate teams &amp; rotation</button>
+    </div>
+    <div id="meta"></div>
+  </div>
+
+  <div class="panel" id="output">
+    <h2>03 — Teams</h2>
+    <div class="teams-grid" id="teamsGrid"></div>
+  </div>
+
+  <div class="panel" id="scheduleOutput" style="display:none;">
+    <h2>04 — Rotation plan (every 5 min: keeper changes, sub changes)</h2>
+    <div class="teams-grid" id="scheduleGrid"></div>
+  </div>
+
+</div>
+
+<script>
+// Edit this list to match your regular group — it's just a shortcut, nothing here is sent anywhere.
+const PRESET_PLAYERS = [
+  { name: 'André Parreira', rank: 4 },
+  { name: 'Luis Claro', rank: 6 },
+  { name: 'Claudio', rank: 7 },
+  { name: 'Joao Veiga', rank: 5 },
+  { name: 'Diogo Mendes', rank: 7 },
+  { name: 'Francisco Bicho', rank: 5 },
+  { name: 'Delta', rank: 5 },
+  { name: 'Miguel Garcez', rank: 5 },
+  { name: 'Marco', rank: 4 },
+  { name: 'Vitor Cardoso', rank: 5 },
+  { name: 'Chitas', rank: 6 },
+  { name: 'Mikael', rank: 5 },
+  { name: 'Miguel Cartaxo', rank: 9 },
+  { name: 'Xanana', rank: 2 },
+  { name: 'Bruno', rank: 3 },
+  { name: 'Renato', rank: 3 }
+];
+
+let players = [];
+
+const presetListEl = document.getElementById('presetList');
+
+function renderPresetList(){
+  if(!PRESET_PLAYERS.length){
+    presetListEl.innerHTML = '<span class="preset-empty">No saved players yet — edit PRESET_PLAYERS in the code to add your regulars.</span>';
+    return;
+  }
+  presetListEl.innerHTML = '';
+  PRESET_PLAYERS.forEach(preset => {
+    const already = players.some(p => p.name === preset.name);
+    const chip = document.createElement('div');
+    chip.className = 'preset-chip' + (already ? ' added' : '');
+    chip.innerHTML = `<span class="rank">${preset.rank}</span><span>${escapeHtml(preset.name)}</span>`;
+    if(!already){
+      chip.onclick = () => quickAdd(preset);
+    }
+    presetListEl.appendChild(chip);
+  });
+}
+
+function quickAdd(preset){
+  metaEl.textContent = '';
+  if(players.length >= 12){ metaEl.textContent = 'Squad is full — 12 players max.'; return; }
+  if(players.some(p => p.name === preset.name)) return;
+  players.push({ name: preset.name, rank: preset.rank });
+  renderPlayers();
+}
+
+const playerListEl = document.getElementById('playerList');
+const emptyStateEl = document.getElementById('emptyState');
+const metaEl = document.getElementById('meta');
+const nameInput = document.getElementById('nameInput');
+const rankOptionsEl = document.getElementById('rankOptions');
+
+function buildRankOptions(){
+  let html = '';
+  for(let i = 1; i <= 10; i++){
+    html += `<input type="radio" name="rank" id="rank${i}" value="${i}"><label for="rank${i}">${i}</label>`;
+  }
+  rankOptionsEl.innerHTML = html;
+}
+
+function getSelectedRank(){
+  const checked = rankOptionsEl.querySelector('input[name="rank"]:checked');
+  return checked ? parseInt(checked.value, 10) : null;
+}
+
+function clearRankSelection(){
+  const checked = rankOptionsEl.querySelector('input[name="rank"]:checked');
+  if(checked) checked.checked = false;
+}
+
+function renderPlayers(){
+  playerListEl.innerHTML = '';
+  emptyStateEl.style.display = players.length ? 'none' : 'block';
+  players.forEach((p, i) => {
+    const chip = document.createElement('div');
+    chip.className = 'chip';
+    chip.innerHTML = `<span class="rank">${p.rank}</span><span>${escapeHtml(p.name)}</span>`;
+    const del = document.createElement('button');
+    del.className = 'btn-danger';
+    del.textContent = '✕';
+    del.onclick = () => { players.splice(i,1); renderPlayers(); };
+    chip.appendChild(del);
+    playerListEl.appendChild(chip);
+  });
+  renderPresetList();
+}
+
+function escapeHtml(s){
+  const d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML;
+}
+
+document.getElementById('addBtn').onclick = addPlayer;
+nameInput.addEventListener('keydown', e => {
+  if(e.key === 'Enter') addPlayer();
+});
+
+function addPlayer(){
+  const name = nameInput.value.trim();
+  const rank = getSelectedRank();
+  metaEl.textContent = '';
+  if(!name){ metaEl.textContent = 'Enter a player name.'; return; }
+  if(!rank){ metaEl.textContent = 'Pick a rank from 1 to 10.'; return; }
+  if(players.length >= 12){ metaEl.textContent = 'Squad is full — 12 players max.'; return; }
+  players.push({ name, rank });
+  nameInput.value = '';
+  clearRankSelection();
+  nameInput.focus();
+  renderPlayers();
+}
+
+document.getElementById('generateBtn').onclick = generate;
+
+function balanceTeams(list){
+  const sorted = [...list].sort((a,b) => b.rank - a.rank);
+  const cap = Math.ceil(sorted.length / 2);
+  const teamA = [], teamB = [];
+  let sumA = 0, sumB = 0;
+  sorted.forEach(p => {
+    const aOpen = teamA.length < cap;
+    const bOpen = teamB.length < cap;
+    if(aOpen && (sumA <= sumB || !bOpen)){
+      teamA.push(p); sumA += p.rank;
+    } else if(bOpen){
+      teamB.push(p); sumB += p.rank;
+    } else {
+      teamA.push(p); sumA += p.rank;
+    }
+  });
+  return { teamA, teamB, sumA, sumB };
+}
+
+function buildSchedule(team, periods, onFieldSize){
+  const n = team.length;
+  const field = Math.min(onFieldSize, n);
+  const benchSize = Math.max(0, n - field);
+  let benchPtr = 0, gkPtr = 0;
+  const rows = [];
+  for(let i = 0; i < periods; i++){
+    let bench = [];
+    if(benchSize > 0){
+      for(let b = 0; b < benchSize; b++){
+        bench.push(team[(benchPtr + b) % n]);
+      }
+      benchPtr = (benchPtr + benchSize) % n;
+    }
+    let gk = null, tries = 0;
+    while(tries <= n){
+      const cand = team[gkPtr % n];
+      gkPtr++;
+      tries++;
+      if(!bench.includes(cand)){ gk = cand; break; }
+    }
+    const onField = team.filter(p => !bench.includes(p) && p !== gk);
+    rows.push({ period: i, bench, gk, onField });
+  }
+  return { rows, field, benchSize };
+}
+
+function generate(){
+  metaEl.textContent = '';
+  if(players.length < 2){ metaEl.textContent = 'Add at least 2 players.'; return; }
+
+  const duration = 60;
+  const onFieldSize = 5;
+  const periods = Math.max(1, Math.round(duration / 5));
+
+  const { teamA, teamB, sumA, sumB } = balanceTeams(players);
+
+  metaEl.textContent = `${duration} min match · ${periods} rotation periods of 5 min · Team Red strength ${sumA} vs Team Blue strength ${sumB}`;
+
+  // Teams panel
+  const teamsGrid = document.getElementById('teamsGrid');
+  teamsGrid.innerHTML = renderTeamCard('Red', 'red', teamA, sumA) + renderTeamCard('Blue', 'blue', teamB, sumB);
+  document.getElementById('output').style.display = 'block';
+
+  // Schedule panel
+  const schedA = buildSchedule(teamA, periods, onFieldSize);
+  const schedB = buildSchedule(teamB, periods, onFieldSize);
+  const scheduleGrid = document.getElementById('scheduleGrid');
+  scheduleGrid.innerHTML =
+    renderScheduleCard('Red', 'red', schedA, duration) +
+    renderScheduleCard('Blue', 'blue', schedB, duration);
+  document.getElementById('scheduleOutput').style.display = 'block';
+}
+
+function renderTeamCard(label, cls, team, sum){
+  const rosterHtml = team
+    .slice().sort((a,b) => b.rank - a.rank)
+    .map(p => `<li><span>${escapeHtml(p.name)}</span><span class="rk">${p.rank}</span></li>`)
+    .join('');
+  return `
+    <div class="team-card ${cls}">
+      <h3><span class="dot ${cls}"></span>Team ${label}</h3>
+      <div class="team-strength">${team.length} players · total rank ${sum} · avg ${(sum/team.length).toFixed(1)}</div>
+      <ul class="roster">${rosterHtml}</ul>
+    </div>`;
+}
+
+function renderScheduleCard(label, cls, sched, duration){
+  const note = sched.benchSize === 0
+    ? `<div class="team-strength">${sched.field}-a-side, no sub needed — everyone plays every period, only the keeper rotates.</div>`
+    : `<div class="team-strength">${sched.field}-a-side + ${sched.benchSize} sub${sched.benchSize>1?'s':''} rotating on the bench each period.</div>`;
+
+  const rows = sched.rows.map(r => {
+    const start = r.period * 5;
+    const end = Math.min(duration, start + 5);
+    const benchTxt = r.bench.length
+      ? r.bench.map(p => escapeHtml(p.name)).join(', ')
+      : '—';
+    const onFieldTxt = r.onField.map(p => escapeHtml(p.name)).join(', ');
+    return `
+      <div class="period">
+        <div class="time">${start}'–${end}'</div>
+        <div class="body">
+          <p><span class="tag gk">GK</span>${escapeHtml(r.gk.name)}</p>
+          <p><span class="tag bench">SUB</span>${benchTxt}</p>
+          <p class="onfield">On field: ${onFieldTxt}</p>
+        </div>
+      </div>`;
+  }).join('');
+
+  return `
+    <div class="team-card ${cls}">
+      <h3><span class="dot ${cls}"></span>Team ${label}</h3>
+      ${note}
+      <div class="schedule">${rows}</div>
+    </div>`;
+}
+
+buildRankOptions();
+renderPlayers();
+</script>
+</body>
+</html>
