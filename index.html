@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Tundela FC — Equipa &amp; Rotação</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
@@ -21,31 +21,40 @@
     --blue-team-dim: #1c333c;
     --radius: 10px;
   }
-  *{box-sizing:border-box;}
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html{-webkit-text-size-adjust:100%;}
   body{
     margin:0;
     background: var(--pitch);
     color:var(--chalk);
-    font-family:'Inter',sans-serif;
+    font-family:'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    -webkit-font-smoothing:antialiased;
     min-height:100vh;
-    padding:28px 16px 60px;
+    min-height:100dvh;
+    padding:20px 14px calc(40px + env(safe-area-inset-bottom));
+    padding-left:calc(14px + env(safe-area-inset-left));
+    padding-right:calc(14px + env(safe-area-inset-right));
+    overflow-x:hidden;
+    font-size:15px;
+    line-height:1.4;
   }
   .wrap{max-width:980px;margin:0 auto;}
   header{
     display:flex;
+    flex-direction:column;
     align-items:center;
     justify-content:center;
-    gap:16px;
-    text-align:left;
-    margin-bottom:28px;
+    gap:12px;
+    text-align:center;
+    margin-bottom:22px;
     border-bottom:1px solid var(--line);
-    padding-bottom:20px;
+    padding-bottom:16px;
   }
-  header .crest{flex:none;width:64px;height:74px;}
-  header .title-block{text-align:left;}
+  header .crest{flex:none;width:56px;height:64px;}
+  header .title-block{text-align:center;}
   h1{
     font-family:'Bebas Neue',sans-serif;
-    font-size:clamp(34px,6vw,50px);
+    font-size:clamp(30px,9vw,50px);
     letter-spacing:2px;
     margin:0 0 2px;
     color:var(--chalk);
@@ -53,19 +62,24 @@
   header p{
     color:var(--chalk-dim);
     margin:0;
-    font-size:14px;
-    letter-spacing:0.5px;
+    font-size:13px;
+    letter-spacing:0.3px;
   }
-  @media(max-width:520px){
-    header{flex-direction:column;text-align:center;}
-    header .title-block{text-align:center;}
+  @media(min-width:600px){
+    header{flex-direction:row;text-align:left;gap:16px;margin-bottom:28px;padding-bottom:20px;}
+    header .crest{width:64px;height:74px;}
+    header .title-block{text-align:left;}
+    header p{font-size:14px;letter-spacing:0.5px;}
   }
   .panel{
     background:rgba(0,0,0,0.18);
     border:1px solid var(--line);
     border-radius:var(--radius);
-    padding:20px;
-    margin-bottom:22px;
+    padding:14px;
+    margin-bottom:16px;
+  }
+  @media(min-width:600px){
+    .panel{padding:20px;margin-bottom:22px;}
   }
   .panel h2{
     font-family:'Bebas Neue',sans-serif;
@@ -84,21 +98,25 @@
     background:var(--pitch-dark);
     border:1px solid var(--line);
     color:var(--chalk);
-    border-radius:6px;
-    padding:10px 12px;
-    font-family:'Inter',sans-serif;
-    font-size:14px;
+    border-radius:8px;
+    padding:11px 12px;
+    font-family:'Inter', -apple-system, sans-serif;
+    font-size:16px;
+    min-height:44px;
+    width:100%;
   }
   .add-row input[type="text"]{flex:1;min-width:140px;}
   .add-row input[type="number"]{width:110px;}
   button{
     cursor:pointer;
     border:none;
-    border-radius:6px;
-    font-family:'Inter',sans-serif;
+    border-radius:8px;
+    font-family:'Inter', -apple-system, sans-serif;
     font-weight:600;
     font-size:14px;
-    padding:10px 16px;
+    padding:11px 16px;
+    min-height:44px;
+    touch-action:manipulation;
     transition:transform .08s ease, filter .15s ease;
   }
   button:active{transform:scale(0.97);}
@@ -106,7 +124,7 @@
   .btn-amber:hover{filter:brightness(1.08);}
   .btn-ghost{background:transparent;color:var(--chalk-dim);border:1px solid var(--line);}
   .btn-ghost:hover{color:var(--chalk);border-color:var(--chalk-dim);}
-  .btn-danger{background:transparent;color:var(--red-team);border:1px solid var(--red-team);padding:4px 9px;font-size:12px;}
+  .btn-danger{background:transparent;color:var(--red-team);border:1px solid var(--red-team);padding:6px 11px;font-size:12px;min-height:32px;min-width:32px;}
 
   #playerList{
     display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;min-height:20px;
@@ -143,16 +161,17 @@
   .rank-options input[type="radio"]{position:absolute;opacity:0;width:0;height:0;}
   .rank-options label{
     display:flex;align-items:center;justify-content:center;
-    min-width:52px;height:32px;
-    padding:0 12px;
-    border-radius:16px;
+    min-width:56px;height:44px;
+    padding:0 14px;
+    border-radius:22px;
     border:1px solid var(--line);
     background:var(--pitch-dark);
     color:var(--chalk-dim);
     font-family:'Space Mono',monospace;
-    font-size:13px;
+    font-size:14px;
     letter-spacing:0.5px;
     cursor:pointer;
+    touch-action:manipulation;
     transition:background .12s ease, color .12s ease, border-color .12s ease;
   }
   .rank-options input[type="radio"]:checked + label{
@@ -173,7 +192,9 @@
   }
   .gk-toggle{
     background:transparent;border:1px solid var(--line);color:var(--chalk-dim);
-    border-radius:50%;width:20px;height:20px;font-size:11px;padding:0;
+    border-radius:50%;width:28px;height:28px;font-size:13px;padding:0;
+    min-height:0;
+    touch-action:manipulation;
     display:flex;align-items:center;justify-content:center;
   }
   .gk-toggle.active{background:var(--amber);border-color:var(--amber);color:#2a1c00;}
@@ -213,63 +234,71 @@
   .preset-empty{color:var(--chalk-dim);font-size:13px;}
 
   .cta-row{display:flex;justify-content:center;margin-top:6px;}
-  .cta-row button{font-size:16px;padding:13px 34px;letter-spacing:0.5px;}
+  .cta-row button{font-size:16px;padding:14px 20px;letter-spacing:0.5px;width:100%;}
+  @media(min-width:600px){
+    .cta-row button{padding:13px 34px;width:auto;}
+  }
 
   #meta{
     text-align:center;color:var(--chalk-dim);font-size:13px;min-height:18px;margin-top:8px;
   }
 
-  .teams-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
-  @media(max-width:700px){
-    .teams-grid{gap:8px;}
-    .team-card{padding:10px;}
-    .team-card h3{font-size:19px;gap:6px;}
-    .team-strength{font-size:10.5px;margin-bottom:8px;}
-    .roster li{padding:6px 8px;font-size:12.5px;}
-    .period{grid-template-columns:40px 1fr;gap:6px;padding:8px 0;}
-    .period .time{font-size:10.5px;}
-    .period .body p{font-size:11.5px;margin:0 0 3px;}
-    .tag{font-size:9.5px;padding:1px 5px;margin-right:4px;}
-    .vest-badge{font-size:9px;padding:2px 6px;}
-  }
-
+  .teams-grid{display:grid;grid-template-columns:1fr;gap:10px;}
   .team-card{
     border-radius:var(--radius);
-    padding:18px;
+    padding:14px;
     border:1px solid var(--line);
   }
   .team-card.red{background:rgba(230,57,70,0.14);}
   .team-card.blue{background:rgba(77,143,172,0.14);}
   .team-card h3{
     font-family:'Bebas Neue',sans-serif;
-    font-size:26px;
+    font-size:20px;
     letter-spacing:1.5px;
     margin:0 0 2px;
-    display:flex;align-items:center;gap:10px;
+    display:flex;align-items:center;gap:8px;
   }
-  .dot{width:12px;height:12px;border-radius:50%;display:inline-block;}
+  .dot{width:12px;height:12px;border-radius:50%;display:inline-block;flex:none;}
   .dot.red{background:var(--red-team);}
   .dot.blue{background:var(--blue-team);}
   .vest-badge{
     margin-left:auto;
-    font-family:'Inter',sans-serif;
-    font-size:10.5px;
+    font-family:'Inter', -apple-system, sans-serif;
+    font-size:10px;
     font-weight:700;
     letter-spacing:0.5px;
     text-transform:uppercase;
     background:var(--amber);
     color:#2a1c00;
-    padding:3px 9px;
+    padding:3px 8px;
     border-radius:4px;
   }
-  .team-strength{font-size:12.5px;color:var(--chalk-dim);margin-bottom:12px;font-family:'Space Mono',monospace;}
+  .team-strength{font-size:11px;color:var(--chalk-dim);margin-bottom:10px;font-family:'Space Mono',monospace;}
   .roster{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px;}
   .roster li{
     display:flex;justify-content:space-between;
     background:rgba(0,0,0,0.25);
-    padding:8px 12px;border-radius:6px;font-size:14px;
+    padding:9px 12px;border-radius:6px;font-size:13.5px;
   }
   .roster li .rk{font-family:'Space Mono',monospace;color:var(--amber);}
+
+  .period{grid-template-columns:34px 1fr;gap:6px;padding:9px 0;display:grid;}
+  .period .time{font-family:'Space Mono',monospace;font-size:10.5px;color:var(--chalk-dim);padding-top:2px;}
+  .period .body p{margin:0 0 3px;font-size:11.5px;}
+  .tag{font-size:9.5px;padding:2px 6px;margin-right:4px;}
+
+  @media(min-width:701px){
+    .teams-grid{grid-template-columns:1fr 1fr;gap:18px;}
+    .team-card{padding:18px;}
+    .team-card h3{font-size:26px;gap:10px;}
+    .team-strength{font-size:12.5px;margin-bottom:12px;}
+    .roster li{padding:8px 12px;font-size:14px;}
+    .period{grid-template-columns:52px 1fr;gap:10px;padding:10px 0;}
+    .period .time{font-size:12px;}
+    .period .body p{font-size:13.5px;margin:0 0 4px;}
+    .tag{font-size:11px;padding:2px 7px;margin-right:6px;}
+    .vest-badge{font-size:10.5px;padding:3px 9px;}
+  }
 
   .schedule-head{
     display:grid;grid-template-columns:52px 1fr 1fr;gap:14px;
@@ -307,6 +336,23 @@
     text-align:center;color:var(--chalk-dim);font-size:13.5px;padding:14px 0 2px;
   }
   ::placeholder{color:#5f7568;}
+
+  .whatsapp-row{margin-top:8px;gap:10px;flex-direction:column;align-items:stretch;}
+  .whatsapp-cta{
+    text-decoration:none;
+    display:flex;align-items:center;justify-content:center;gap:8px;
+    background:#25D366;color:#04170c;
+    font-family:'Inter', -apple-system, sans-serif;font-weight:700;
+    font-size:14.5px;text-align:center;
+    padding:13px 18px;
+    min-height:44px;
+    border-radius:24px;
+    touch-action:manipulation;
+  }
+  @media(min-width:600px){
+    .whatsapp-row{flex-direction:row;flex-wrap:wrap;gap:12px;}
+    .whatsapp-cta{font-size:15px;padding:12px 26px;flex:none;}
+  }
 </style>
 </head>
 <body>
@@ -371,15 +417,13 @@
     <div class="teams-grid" id="scheduleGrid"></div>
   </div>
 
-  <div class="cta-row" style="margin-top:8px;gap:12px;flex-wrap:wrap;">
-    <a href="https://wa.me/351913532698?text=O%20meu%20rank%20é%20uma%20merda%20mas%20eu%20tambem%20nao%20jogo%20nada"
-       target="_blank" rel="noopener"
-       style="text-decoration:none;display:inline-flex;align-items:center;gap:8px;background:#25D366;color:#04170c;font-family:'Inter',sans-serif;font-weight:700;font-size:15px;padding:12px 26px;border-radius:24px;">
+  <div class="cta-row whatsapp-row">
+    <a class="whatsapp-cta" href="https://wa.me/351913532698?text=O%20meu%20rank%20é%20uma%20merda%20mas%20eu%20tambem%20nao%20jogo%20nada"
+       target="_blank" rel="noopener">
       💬 Reclamar do meu ranking
     </a>
-    <a href="https://wa.me/351913532698?text=O%20Delta%20devia%20ser%20o%20ultimo%20do%20ranking"
-       target="_blank" rel="noopener"
-       style="text-decoration:none;display:inline-flex;align-items:center;gap:8px;background:#25D366;color:#04170c;font-family:'Inter',sans-serif;font-weight:700;font-size:15px;padding:12px 26px;border-radius:24px;">
+    <a class="whatsapp-cta" href="https://wa.me/351913532698?text=O%20Delta%20devia%20ser%20o%20ultimo%20do%20ranking"
+       target="_blank" rel="noopener">
       📊 Sugerir ranking para mim ou para os meus colegas de equipa
     </a>
   </div>
