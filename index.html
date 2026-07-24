@@ -211,6 +211,18 @@
   .dot{width:12px;height:12px;border-radius:50%;display:inline-block;}
   .dot.red{background:var(--red-team);}
   .dot.blue{background:var(--blue-team);}
+  .vest-badge{
+    margin-left:auto;
+    font-family:'Inter',sans-serif;
+    font-size:10.5px;
+    font-weight:700;
+    letter-spacing:0.5px;
+    text-transform:uppercase;
+    background:var(--amber);
+    color:#2a1c00;
+    padding:3px 9px;
+    border-radius:4px;
+  }
   .team-strength{font-size:12.5px;color:var(--chalk-dim);margin-bottom:12px;font-family:'Space Mono',monospace;}
   .roster{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px;}
   .roster li{
@@ -439,6 +451,18 @@ function balanceTeams(list){
     }
   });
   return { teamA, teamB, sumA, sumB };
+} 
+
+function decideVests(teamA, teamB){
+  const hasParreira = team => team.some(p => p.name.toLowerCase().includes('parreira'));
+  const aHas = hasParreira(teamA);
+  const bHas = hasParreira(teamB);
+  if(aHas && !bHas) return { label: 'Blue' };
+  if(bHas && !aHas) return { label: 'Red'};
+  // no Parreira on either side (or a Parreira on both) — coin flip
+  return Math.random() < 0.5
+    ? { label: 'Red' }
+    : { label: 'Blue' };
 }
 
 function buildSchedule(team, periods, onFieldSize){
@@ -477,12 +501,15 @@ function generate(){
   const periods = Math.max(1, Math.round(duration / 5));
 
   const { teamA, teamB, sumA, sumB } = balanceTeams(players);
+  const vests = decideVests(teamA, teamB);
 
-  metaEl.textContent = `${duration} min match · ${periods} rotation periods of 5 min · Team Red strength ${sumA} vs Team Blue strength ${sumB}`;
+  metaEl.textContent = `${duration} min match · ${periods} rotation periods of 5 min · Team Red strength ${sumA} vs Team Blue strength ${sumB} · Team ${vests.label} wears vests`;
 
   // Teams panel
   const teamsGrid = document.getElementById('teamsGrid');
-  teamsGrid.innerHTML = renderTeamCard('Red', 'red', teamA, sumA) + renderTeamCard('Blue', 'blue', teamB, sumB);
+  teamsGrid.innerHTML =
+    renderTeamCard('Red', 'red', teamA, sumA, vests.label === 'Red') +
+    renderTeamCard('Blue', 'blue', teamB, sumB, vests.label === 'Blue');
   document.getElementById('output').style.display = 'block';
 
   // Schedule panel
@@ -495,14 +522,15 @@ function generate(){
   document.getElementById('scheduleOutput').style.display = 'block';
 }
 
-function renderTeamCard(label, cls, team, sum){
+function renderTeamCard(label, cls, team, sum, wearsVests){
   const rosterHtml = team
     .slice().sort((a,b) => b.rank - a.rank)
     .map(p => `<li><span>${escapeHtml(p.name)}</span><span class="rk">${p.rank}</span></li>`)
     .join('');
+  const vestBadge = wearsVests ? '<span class="vest-badge">Vests</span>' : '';
   return `
     <div class="team-card ${cls}">
-      <h3><span class="dot ${cls}"></span>Team ${label}</h3>
+      <h3><span class="dot ${cls}"></span>Team ${label}${vestBadge}</h3>
       <div class="team-strength">${team.length} players · total rank ${sum} · avg ${(sum/team.length).toFixed(1)}</div>
       <ul class="roster">${rosterHtml}</ul>
     </div>`;
