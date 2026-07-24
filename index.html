@@ -465,29 +465,43 @@ function decideVests(teamA, teamB){
     : { label: 'Blue' };
 }
 
+// Builds a fixed per-slot role pattern of length n so that, followed around
+// in order, every player's own routine reads: Playing - GK - Playing - SUB
+// (then back to Playing until GK comes around again). GK and SUB are never
+// adjacent for the same player — there's always at least one Playing turn
+// between them, in both directions.
+function buildSlotPattern(n, field, benchSize){
+  const playSlots = Math.max(0, field - 1); // outfield (non-GK) slots
+  const trailingP = (benchSize > 0 && playSlots > 0) ? 1 : 0; // one Playing turn right before GK wraps around
+  const midP = playSlots - trailingP; // Playing turns right after GK, before SUB
+
+  const pattern = ['GK'];
+  for(let i = 0; i < midP; i++) pattern.push('PLAY');
+  for(let i = 0; i < benchSize; i++) pattern.push('SUB');
+  for(let i = 0; i < trailingP; i++) pattern.push('PLAY');
+  while(pattern.length < n) pattern.push('PLAY'); // safety padding for edge cases
+  return pattern.slice(0, n);
+}
+
 function buildSchedule(team, periods, onFieldSize){
   const n = team.length;
   const field = Math.min(onFieldSize, n);
   const benchSize = Math.max(0, n - field);
-  let benchPtr = 0, gkPtr = 0;
+  const pattern = buildSlotPattern(n, field, benchSize);
+
   const rows = [];
-  for(let i = 0; i < periods; i++){
-    let bench = [];
-    if(benchSize > 0){
-      for(let b = 0; b < benchSize; b++){
-        bench.push(team[(benchPtr + b) % n]);
-      }
-      benchPtr = (benchPtr + benchSize) % n;
+  for(let t = 0; t < periods; t++){
+    let gk = null;
+    const bench = [];
+    const onField = [];
+    for(let i = 0; i < n; i++){
+      const role = pattern[(i + t) % n];
+      const p = team[i];
+      if(role === 'GK') gk = p;
+      else if(role === 'SUB') bench.push(p);
+      else onField.push(p);
     }
-    let gk = null, tries = 0;
-    while(tries <= n){
-      const cand = team[gkPtr % n];
-      gkPtr++;
-      tries++;
-      if(!bench.includes(cand)){ gk = cand; break; }
-    }
-    const onField = team.filter(p => !bench.includes(p) && p !== gk);
-    rows.push({ period: i, bench, gk, onField });
+    rows.push({ period: t, bench, gk, onField });
   }
   return { rows, field, benchSize };
 }
