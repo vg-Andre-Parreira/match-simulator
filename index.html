@@ -431,6 +431,42 @@ function savePlayers(){
   }
 }
 
+const OUTPUT_STORAGE_KEY = 'tundelaFcOutput_v1';
+
+function saveGeneratedOutput(){
+  try{
+    const teamsGrid = document.getElementById('teamsGrid');
+    const scheduleGrid = document.getElementById('scheduleGrid');
+    localStorage.setItem(OUTPUT_STORAGE_KEY, JSON.stringify({
+      meta: metaEl.textContent,
+      teamsHtml: teamsGrid.innerHTML,
+      scheduleHtml: scheduleGrid.innerHTML
+    }));
+  } catch(e){
+    // storage unavailable — fail silently
+  }
+}
+
+function loadGeneratedOutput(){
+  try{
+    const raw = localStorage.getItem(OUTPUT_STORAGE_KEY);
+    if(!raw) return;
+    const saved = JSON.parse(raw);
+    if(!saved || !saved.teamsHtml) return;
+    document.getElementById('teamsGrid').innerHTML = saved.teamsHtml;
+    document.getElementById('scheduleGrid').innerHTML = saved.scheduleHtml || '';
+    metaEl.textContent = saved.meta || '';
+    document.getElementById('output').style.display = 'block';
+    document.getElementById('scheduleOutput').style.display = saved.scheduleHtml ? 'block' : 'none';
+  } catch(e){
+    // corrupted/unavailable storage — ignore and start fresh
+  }
+}
+
+function clearGeneratedOutput(){
+  try{ localStorage.removeItem(OUTPUT_STORAGE_KEY); } catch(e){}
+}
+
 // Categories shown in the UI. Each one maps to a numeric range; the actual
 // rank stored/used for calculations is the median of that range.
 const CATEGORIES = [
@@ -575,6 +611,7 @@ function fullReset(){
   if(!ok) return;
   players = [];
   try{ localStorage.removeItem(STORAGE_KEY); } catch(e){}
+  clearGeneratedOutput();
   document.getElementById('output').style.display = 'none';
   document.getElementById('scheduleOutput').style.display = 'none';
   metaEl.textContent = '';
@@ -717,6 +754,8 @@ function generate(){
     renderScheduleCard('Vermelho', 'vermelho', schedA, duration) +
     renderScheduleCard('Azul', 'azul', schedB, duration);
   document.getElementById('scheduleOutput').style.display = 'block';
+
+  saveGeneratedOutput();
 }
 
 // --- Special case: 11 players total -----------------------------------
@@ -837,6 +876,8 @@ function generateElevenPlayerMode(periods, duration){
       <div class="schedule">${renderElevenPeriods(rows, duration)}</div>
     </div>`;
   document.getElementById('scheduleOutput').style.display = 'block';
+
+  saveGeneratedOutput();
 }
 
 function renderElevenPeriods(rows, duration){
@@ -913,6 +954,7 @@ function renderScheduleCard(label, cls, sched, duration){
 
 buildRankOptions();
 renderPlayers();
+loadGeneratedOutput();
 </script>
 </body>
 </html>
