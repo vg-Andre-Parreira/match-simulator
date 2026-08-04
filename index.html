@@ -1004,7 +1004,7 @@ function renderElevenPeriods(rows, duration){
 function renderTeamCard(label, cls, team, sum, wearsVests){
   const rosterHtml = team
     .slice().sort((a,b) => b.rank - a.rank)
-    .map(p => `<li><span>${escapeHtml(p.name)}</span><span class="rk">${categoryLabel(p.rank)}</span></li>`)
+    .map(p => `<li><span>${escapeHtml(p.name)}</span></li>`)
     .join('');
   const vestBadge = wearsVests ? '<span class="vest-badge">Coletes</span>' : '';
   return `
