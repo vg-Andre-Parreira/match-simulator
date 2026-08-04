@@ -436,6 +436,7 @@ const PRESET_PLAYERS = [
   { name: 'Miguel Cartaxo', rank: 9 },
   { name: 'Claudio', rank: 7 },
   { name: 'Diogo Mendes', rank: 7 },
+  { name: 'Valter', rank: 7 },
   { name: 'Luis Claro', rank: 6 },
   { name: 'Chitas', rank: 6 },
   { name: 'Joao Veiga', rank: 5 },
@@ -662,20 +663,72 @@ function fullReset(){
   renderPlayers();
 }
 
-function draftInto(pool, capA, capB, teamA, teamB, sumA, sumB){
-  const sorted = [...pool].sort((a,b) => b.rank - a.rank);
-  sorted.forEach(p => {
-    const aOpen = teamA.length < capA;
-    const bOpen = teamB.length < capB;
-    if(aOpen && (sumA <= sumB || !bOpen)){
-      teamA.push(p); sumA += p.rank;
-    } else if(bOpen){
-      teamB.push(p); sumB += p.rank;
-    } else {
-      teamA.push(p); sumA += p.rank;
+function draftInto(pool, capA, capB, teamA = [], teamB = [], sumA = 0, sumB = 0) {
+  const remainingA = capA - teamA.length;
+  const remainingB = capB - teamB.length;
+
+  if (remainingA < 0 || remainingB < 0) {
+    throw new Error("Initial teams exceed capacities.");
+  }
+  if (pool.length !== remainingA + remainingB) {
+    throw new Error("Pool size must exactly fill remaining slots.");
+  }
+
+  // We only decide which players from pool go to A (rest go to B).
+  // Need exactly remainingA players in A and we want:
+  // minimize |(sumA + addA) - (sumB + (totalPool - addA))|
+  const totalPool = pool.reduce((s, p) => s + p.rank, 0);
+  const baseDelta = sumA - sumB; // existing difference before assigning pool
+
+  // DP[count][sum] = bitmask of chosen indices from pool
+  // Using BigInt bitmask so it works beyond 31 players.
+  const dp = Array.from({ length: remainingA + 1 }, () => new Map());
+  dp[0].set(0, 0n);
+
+  for (let i = 0; i < pool.length; i++) {
+    const r = pool[i].rank;
+    for (let c = Math.min(i + 1, remainingA); c >= 1; c--) {
+      for (const [prevSum, prevMask] of dp[c - 1]) {
+        const nextSum = prevSum + r;
+        if (!dp[c].has(nextSum)) {
+          dp[c].set(nextSum, prevMask | (1n << BigInt(i)));
+        }
+      }
     }
-  });
-  return { teamA, teamB, sumA, sumB };
+  }
+
+  let bestSumAFromPool = null;
+  let bestMask = 0n;
+  let bestDiff = Infinity;
+
+  for (const [addA, mask] of dp[remainingA]) {
+    const addB = totalPool - addA;
+    const finalDiff = Math.abs((baseDelta + addA - addB));
+    if (finalDiff < bestDiff) {
+      bestDiff = finalDiff;
+      bestSumAFromPool = addA;
+      bestMask = mask;
+    }
+  }
+
+  // Build resulting teams
+  const newTeamA = [...teamA];
+  const newTeamB = [...teamB];
+  let newSumA = sumA;
+  let newSumB = sumB;
+
+  for (let i = 0; i < pool.length; i++) {
+    const inA = ((bestMask >> BigInt(i)) & 1n) === 1n;
+    if (inA) {
+      newTeamA.push(pool[i]);
+      newSumA += pool[i].rank;
+    } else {
+      newTeamB.push(pool[i]);
+      newSumB += pool[i].rank;
+    }
+  }
+
+  return { teamA: newTeamA, teamB: newTeamB, sumA: newSumA, sumB: newSumB };
 }
 
 function balanceTeams(list){
