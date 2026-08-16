@@ -282,6 +282,15 @@
   }
   .roster li .rk{font-family:'Space Mono',monospace;color:var(--amber);}
 
+  .rotation-order{margin-top:12px;padding-top:10px;border-top:1px dashed var(--line);}
+  .rotation-order p{
+    margin:0 0 6px;font-size:12px;color:var(--chalk-dim);
+    font-family:'Space Mono',monospace;line-height:1.5;
+    word-break:break-word;
+  }
+  .rotation-order p:last-child{margin-bottom:0;}
+  .rotation-order .tag{vertical-align:middle;}
+
   .period{grid-template-columns:34px 1fr;gap:6px;padding:9px 0;display:grid;}
   .period .time{font-family:'Space Mono',monospace;font-size:10.5px;color:var(--chalk-dim);padding-top:2px;}
   .period .body p{margin:0 0 3px;font-size:11.5px;}
@@ -664,6 +673,19 @@ function fullReset(){
   renderPlayers();
 }
 
+// Shuffles a copy of the array. Used before balancing so that players who
+// tie on rank don't always land on the same team run after run — the DP
+// below always keeps the first split it finds for a given sum, so without
+// this, ties would resolve identically (same team) every single generate.
+function shuffle(arr){
+  const a = arr.slice();
+  for(let i = a.length - 1; i > 0; i--){
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
 function draftInto(pool, capA, capB, teamA = [], teamB = [], sumA = 0, sumB = 0) {
   const remainingA = capA - teamA.length;
   const remainingB = capB - teamB.length;
@@ -739,11 +761,11 @@ function balanceTeams(list){
   if(fixedGKs.length >= 2){
     // Two fixed goalkeepers: one on each team, teams balanced around them.
     const teamA = [fixedGKs[0]], teamB = [fixedGKs[1]];
-    const rest = list.filter(p => p !== fixedGKs[0] && p !== fixedGKs[1]);
+    const rest = shuffle(list.filter(p => p !== fixedGKs[0] && p !== fixedGKs[1]));
     return draftInto(rest, cap, cap, teamA, teamB, fixedGKs[0].rank, fixedGKs[1].rank);
   }
 
-  return draftInto(list, cap, cap, [], [], 0, 0);
+  return draftInto(shuffle(list), cap, cap, [], [], 0, 0);
 }
 
 function decideVests(teamA, teamB){
@@ -837,16 +859,26 @@ function generate(){
 
   metaEl.textContent = `${duration} min de jogo · ${periods} rotações de 5 min · Força da Equipa Vermelha ${sumA} vs Força da Equipa Azul ${sumB} · A Equipa ${vests.label} usa coletes`;
 
+  // Schedule (built first so team cards below can show the SUB/GK rotation order)
+  const schedA = buildSchedule(teamA, periods, onFieldSize);
+  const schedB = buildSchedule(teamB, periods, onFieldSize);
+  const orderA = {
+    gkOrder: orderFromSequence(schedA.rows.map(r => r.gk)),
+    subOrder: orderFromSequence(schedA.rows.flatMap(r => r.bench))
+  };
+  const orderB = {
+    gkOrder: orderFromSequence(schedB.rows.map(r => r.gk)),
+    subOrder: orderFromSequence(schedB.rows.flatMap(r => r.bench))
+  };
+
   // Teams panel
   const teamsGrid = document.getElementById('teamsGrid');
   teamsGrid.innerHTML =
-    renderTeamCard('Vermelho', 'vermelho', teamA, sumA, vests.label === 'Vermelho') +
-    renderTeamCard('Azul', 'azul', teamB, sumB, vests.label === 'Azul');
+    renderTeamCard('Vermelho', 'vermelho', teamA, sumA, vests.label === 'Vermelho', orderA) +
+    renderTeamCard('Azul', 'azul', teamB, sumB, vests.label === 'Azul', orderB);
   document.getElementById('output').style.display = 'block';
 
   // Schedule panel
-  const schedA = buildSchedule(teamA, periods, onFieldSize);
-  const schedB = buildSchedule(teamB, periods, onFieldSize);
   const scheduleGrid = document.getElementById('scheduleGrid');
   scheduleGrid.innerHTML = renderScheduleSideBySide(schedA, schedB, duration);
 
@@ -867,7 +899,7 @@ function splitElevenBalanced(list){
 
   if(fixedGKs.length >= 2){
     const [gkA, gkB] = fixedGKs;
-    const others = list.filter(p => p !== gkA && p !== gkB);
+    const others = shuffle(list.filter(p => p !== gkA && p !== gkB));
     let best = null;
     for(let i = 0; i < others.length; i++){
       const subCandidate = others[i];
@@ -890,11 +922,12 @@ function splitElevenBalanced(list){
     return best;
   }
 
+  const pool = shuffle(list);
   let best = null;
-  for(let i = 0; i < list.length; i++){
-    const subCandidate = list[i];
+  for(let i = 0; i < pool.length; i++){
+    const subCandidate = pool[i];
     if(subCandidate.fixedGK) continue; // a fixed GK can never be the resting sub
-    const rest = list.filter((_, idx) => idx !== i);
+    const rest = pool.filter((_, idx) => idx !== i);
     const sorted = [...rest].sort((a,b) => b.rank - a.rank);
     const teamA = [], teamB = [];
     let sumA = 0, sumB = 0;
@@ -958,13 +991,23 @@ function generateElevenPlayerMode(periods, duration){
 
   metaEl.textContent = `${duration} min de jogo · ${periods} rotações de 5 min · 11 jogadores — um suplente rotativo entra alternadamente na Equipa Vermelha e na Equipa Azul · Força da Equipa Vermelha ${split.sumA} vs Força da Equipa Azul ${split.sumB} · A Equipa ${vests.label} usa coletes`;
 
+  // Schedule (built first so team cards below can show the SUB/GK rotation order)
+  const rows = buildElevenPlayerSchedule(split, periods);
+  const orderA = {
+    gkOrder: orderFromSequence(rows.map(r => r.gkA)),
+    subOrder: orderFromSequence(rows.filter(r => r.fedTeam === 'Vermelho').map(r => r.subbedOut))
+  };
+  const orderB = {
+    gkOrder: orderFromSequence(rows.map(r => r.gkB)),
+    subOrder: orderFromSequence(rows.filter(r => r.fedTeam === 'Azul').map(r => r.subbedOut))
+  };
+
   const teamsGrid = document.getElementById('teamsGrid');
   teamsGrid.innerHTML =
-    renderTeamCard('Vermelho', 'vermelho', split.teamA, split.sumA, vests.label === 'Vermelho') +
-    renderTeamCard('Azul', 'azul', split.teamB, split.sumB, vests.label === 'Azul');
+    renderTeamCard('Vermelho', 'vermelho', split.teamA, split.sumA, vests.label === 'Vermelho', orderA) +
+    renderTeamCard('Azul', 'azul', split.teamB, split.sumB, vests.label === 'Azul', orderB);
   document.getElementById('output').style.display = 'block';
 
-  const rows = buildElevenPlayerSchedule(split, periods);
   const scheduleGrid = document.getElementById('scheduleGrid');
   scheduleGrid.innerHTML = `
     <div class="team-card" style="grid-column:1 / -1;background:rgba(0,0,0,0.22);">
@@ -1002,17 +1045,36 @@ function renderElevenPeriods(rows, duration){
   }).join('');
 }
 
-function renderTeamCard(label, cls, team, sum, wearsVests){
+// Collapses a sequence of role-holders (one entry per period, may contain
+// repeats or nulls) into the unique rotation order — each player kept once,
+// at the position of their first appearance.
+function orderFromSequence(seq){
+  const out = [];
+  seq.forEach(p => { if(p && !out.includes(p)) out.push(p); });
+  return out;
+}
+
+function formatOrder(list){
+  return list && list.length ? list.map(p => escapeHtml(p.name)).join('-') : '—';
+}
+
+function renderTeamCard(label, cls, team, sum, wearsVests, orderInfo){
   const rosterHtml = team
     .slice().sort((a,b) => b.rank - a.rank)
     .map(p => `<li><span>${escapeHtml(p.name)}</span></li>`)
     .join('');
   const vestBadge = wearsVests ? '<span class="vest-badge">Coletes</span>' : '';
+  const orderHtml = orderInfo ? `
+      <div class="rotation-order">
+        <p><span class="tag bench">SUB</span>${formatOrder(orderInfo.subOrder)}</p>
+        <p><span class="tag gk">GK</span>${formatOrder(orderInfo.gkOrder)}</p>
+      </div>` : '';
   return `
     <div class="team-card ${cls}">
       <h3><span class="dot ${cls}"></span>Equipa ${label}${vestBadge}</h3>
       <div class="team-strength">${team.length} jogadores · total de rank ${sum} · média ${(sum/team.length).toFixed(1)}</div>
       <ul class="roster">${rosterHtml}</ul>
+      ${orderHtml}
     </div>`;
 }
 
